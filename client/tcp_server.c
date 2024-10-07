@@ -111,9 +111,25 @@ int main(int argc, char** argv)
                         bufs[ud->fd][i] = toupper(bufs[ud->fd][i]);
                     }
                     add_socket_write(&ring, ud->fd, result);
-                    printf("Сконвертировали %s и добавили в запись\n", bufs[ud->fd]);
+                    for (int i = 0; i < MAX_CONNECTIONS; i++)
+                    {
+                        if (conns[i].is_working == 1)
+                        {
+                            printf("Сокет в работе %d\n", conns[i].fd);
+                        }
+                        if (conns[i].fd == ud->fd || conns[i].fd == serv_socket)
+                            continue;
+                        else 
+                        {
+                            if (conns[i].is_working == 1)
+                            {
+                                strncpy(bufs[conns[i].fd], bufs[ud->fd], result);
+                                add_socket_write(&ring, conns[i].fd, result);
+                                printf("Добавили в запись соседа %d\n", conns[i].fd);
+                            }
+                        }
+                    }
                 }
-                
             }
             else if (ud->type == WRITE)
             {
@@ -139,6 +155,7 @@ void add_accept(struct io_uring *ring, int fd, struct sockaddr* client_addr,
     conn_info *conn = &conns[fd];
     conn->fd = fd;
     conn->type = ACCEPT;
+    conn->is_working = 1;
 
     io_uring_sqe_set_data(sqe, conn);
 }

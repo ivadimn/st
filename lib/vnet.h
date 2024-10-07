@@ -22,6 +22,7 @@
 typedef struct conn_info {
     int fd;
     unsigned type;
+    int is_working;
     struct sockaddr_storage client_addr;
 } conn_info;
 
