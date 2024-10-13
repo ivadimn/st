@@ -89,6 +89,7 @@ int main(int argc, char** argv)
             if (ud->type == ACCEPT)
             {
                 memcpy(&ud->client_addr, &client_address, client_len);
+                conns[result].is_working = 1;
                 add_socket_read(&ring, result, MAXLINE);
                 char address_buffer[ADDRBUFFSIZE];
                 getnameinfo((struct sockaddr*) &ud->client_addr, client_len, 
@@ -106,26 +107,26 @@ int main(int argc, char** argv)
                 }
                 else
                 {
-                    for (int i = 0; i < result; i++)
+                    for (int j = 0; j < result; j++)
                     {
-                        bufs[ud->fd][i] = toupper(bufs[ud->fd][i]);
+                        bufs[ud->fd][j] = toupper(bufs[ud->fd][j]);
                     }
                     add_socket_write(&ring, ud->fd, result);
-                    for (int i = 0; i < MAX_CONNECTIONS; i++)
+                    for (int j = 0; j < MAX_CONNECTIONS; j++)
                     {
-                        if (conns[i].is_working == 1)
+                        if (conns[j].is_working == 1)
                         {
-                            printf("Сокет в работе %d\n", conns[i].fd);
+                            printf("Сокет в работе %d\n", conns[j].fd);
                         }
-                        if (conns[i].fd == ud->fd || conns[i].fd == serv_socket)
+                        if (conns[j].fd == ud->fd || conns[j].fd == serv_socket)
                             continue;
                         else 
                         {
-                            if (conns[i].is_working == 1)
+                            if (conns[j].is_working == 1)
                             {
-                                strncpy(bufs[conns[i].fd], bufs[ud->fd], result);
-                                add_socket_write(&ring, conns[i].fd, result);
-                                printf("Добавили в запись соседа %d\n", conns[i].fd);
+                                strncpy(bufs[conns[j].fd], bufs[ud->fd], result);
+                                add_socket_write(&ring, conns[j].fd, result);
+                                printf("Добавили в запись соседа %d\n", conns[j].fd);
                             }
                         }
                     }
@@ -155,8 +156,7 @@ void add_accept(struct io_uring *ring, int fd, struct sockaddr* client_addr,
     conn_info *conn = &conns[fd];
     conn->fd = fd;
     conn->type = ACCEPT;
-    conn->is_working = 1;
-
+    
     io_uring_sqe_set_data(sqe, conn);
 }
 
