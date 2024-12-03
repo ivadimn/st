@@ -31,6 +31,37 @@ int main(int argc, char* argv[])
                             valuemask, &myat);
 
     /* 3. дайте подсказки диспетчеру окон */
-    
+
+    wmsize.flags = USPosition | USSize;
+    XSetWMNormalHints(mydisplay, mywindow, &wmsize);
+    wmhints.initial_state = NormalState;
+    wmhints.flags = StateHint;
+    XSetWMHints(mydisplay, mywindow, &wmhints);
+    XStringListToTextProperty(&window_name, 1, &windowName);
+    XSetWMName(mydisplay, mywindow, &windowName);
+    XStringListToTextProperty(&icon_name, 1, &iconName);
+    XSetWMIconName(mydisplay, mywindow, &iconName);
+
+    /*     4. Установить ресурсы окон  */
+    /*  5. Создать все остальные необходимые окна  */
+    /*  6. Выбрать события для каждого окна  */
+    /*  7. Сопоставить окна  */
+
+    XMapWindow(mydisplay, mywindow);
+
+    done = 0;
+    while (done == 0)
+    {
+        XNextEvent(mydisplay, &myevent);
+        switch (myevent.type)
+        {
+        case ButtonPress:
+            break;
+        }
+    }
+    XUnmapWindow(mydisplay, mywindow);
+    XDestroyWindow(mydisplay, mywindow);
+    XCloseDisplay(mydisplay);   
+    return 0;
 
 }

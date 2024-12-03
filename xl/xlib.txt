@@ -180,6 +180,96 @@ gcc -o basic -I /usr/include/X11 -L /usr/X11R6/lib -lX11 basic.c
 
 ./basic &
 
+#include <X11/Xlib.h>
+#include <X11/Xutil.h>
+
+int main(int argc, char* argv[])
+{
+    Display *mydisplay;
+    XSetWindowAttributes myat;
+    Window mywindow;
+    XSizeHints wmsize;
+    XWMHints wmhints;
+    XTextProperty windowName, iconName;
+    XEvent myevent;
+    char *window_name = "Basic";
+    char *icon_name = "Ba";
+    int screen_num, done;
+    unsigned long valuemask;
+
+    /* 1. открыть соединенте с сервером X window */
+    mydisplay = XOpenDisplay("");
+
+    /* 2. создать верхнеуровневое (root) окно */
+    screen_num = DefaultScreen(mydisplay);
+    myat.background_pixel = WhitePixel(mydisplay, screen_num);
+    myat.border_pixel = BlackPixel(mydisplay, screen_num);
+    myat.event_mask = ButtonPressMask;
+    valuemask = CWBackPixel | CWBorderPixel | CWEventMask;
+    mywindow = XCreateWindow(mydisplay, RootWindow(mydisplay, screen_num), 
+                            200, 200, 600, 400, 2,
+                            DefaultDepth(mydisplay, screen_num), InputOutput, 
+                            DefaultVisual(mydisplay, screen_num), 
+                            valuemask, &myat);
+
+    /* 3. дайте подсказки диспетчеру окон */
+
+    wmsize.flags = USPosition | USSize;
+    XSetWMNormalHints(mydisplay, mywindow, &wmsize);
+    wmhints.initial_state = NormalState;
+    wmhints.flags = StateHint;
+    XSetWMHints(mydisplay, mywindow, &wmhints);
+    XStringListToTextProperty(&window_name, 1, &windowName);
+    XSetWMName(mydisplay, mywindow, &windowName);
+    XStringListToTextProperty(&icon_name, 1, &iconName);
+    XSetWMIconName(mydisplay, mywindow, &iconName);
+
+    /*     4. Установить ресурсы окон  */
+    /*  5. Создать все остальные необходимые окна  */
+    /*  6. Выбрать события для каждого окна  */
+    /*  7. Сопоставить окна  */
+
+    XMapWindow(mydisplay, mywindow);
+
+    done = 0;
+    while (done == 0)
+    {
+        XNextEvent(mydisplay, &myevent);
+        switch (myevent.type)
+        {
+        case ButtonPress:
+            break;
+        }
+    }
+    XUnmapWindow(mydisplay, mywindow);
+    XDestroyWindow(mydisplay, mywindow);
+    XCloseDisplay(mydisplay);   
+    return 0;
+
+}
+
+Что касается примера X Window на рисунке 2.2, следует отметить следующее:
+
+• Это, возможно, самый простой пример из возможных;
+• В примере нет способа завершить выполнение. В системе Unix это можно сделать с помощью ps из оболочки для поиска идентификатора процесса исполняемого кода и использования этого идентификатора в команде kill из оболочки для завершения этого процесса.
+• 9 шагов показаны как комментарии, но используются только 5;
+• Из-за способа завершения программы шаг 9 не является необходимым,
+потому что он никогда не будет выполнен;
+• Использование максимального количества значений по умолчанию было использовано для сокращения размера примера
+до минимума;
+• Цикл событий шага 8 необходим, иначе на экране сервера не появится окно.
+Попробуйте удалить этот цикл, чтобы проверить это утверждение. Цикл требуется для обеспечения обработки событий, которая необходима для функционирования Xlib.
+• Важно. Та же переменная типа XEvent должна использоваться в вызове функции XNextEvent() и во всей последующей обработке этого события. В этом примере это происходит только в операторе switch.
+
+На рисунке 2.1 показано, что появляется на экране при выполнении программы на рисунке 2.2. Этот
+пример только создает окно и размещает его на экране. Это окно пустое. Примечание: при
+создании окна графический контекст (GC) не задействован (см. далее). Графический контекст задействован только при рисовании в этом окне — графический контекст связан с операциями рисования.
+На рисунке 2.1 показаны некоторые дополнения. К ним относятся оформление окна и окружающий черно-белый узор из точек корневого окна, используемого на компьютере, с которого был сделан снимок экрана. Они будут отображаться на всех снимках экрана на следующих страницах. Они являются свойством диспетчера окон X11, что выходит за рамки данной текущей работы.
+
+Примечание: большинство приложений X Window начинаются как каркас, прикрепленный к указателю на экране.
+При нажатии кнопки мыши диспетчер окон рисует окно, содержащееся в коде, например, как на рисунке 2.1. Этого не происходит, когда код рисунка 2.2 или любая другая программа, содержащаяся в этой работе. Вместо этого начальное окно рисуется на экране в позиции, назначенной в вызове XCreateWindow(). Это изменение в поведении связано с XSetWMNormalHints()
+
+
 
 
 
