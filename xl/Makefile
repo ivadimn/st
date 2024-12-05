@@ -4,8 +4,8 @@ LDFLAGS=-lX11
 
 BINARY=xl
 
-build: main.c
-	$(CC) $(CFLAGS) main.c -o xl $(LDFLAGS)
+build: mains.c
+	$(CC) $(CFLAGS) mains.c -o xl $(LDFLAGS)
 
 clean:
 	rm -f $(BINARY)
