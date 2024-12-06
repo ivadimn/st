@@ -25,7 +25,8 @@ int main(int argc, char* argv[])
 
     /* 2. создать верхнеуровневое (root) окно */
     screen_num = DefaultScreen(mydisplay);
-    myat.background_pixel = WhitePixel(mydisplay, screen_num);
+    //myat.background_pixel = WhitePixel(mydisplay, screen_num);
+    myat.background_pixel = 0x0000FF00;
     myat.border_pixel = BlackPixel(mydisplay, screen_num);
     valuemask = CWBackPixel;
     /* создаём окно с полным набором атрибутов*/
