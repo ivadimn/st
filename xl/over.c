@@ -18,8 +18,15 @@
 #define backing_width 16
 #define backing_height 16
 static unsigned char backing_bits[] = {
-0xff, 0x00, 0xff, 0x00, 0xff, 0x00, 0xff, 0x00, 0xff, 0x00, 0xff, 0x00,
-0xff, 0x00, 0xff, 0x00, 0x00, 0xff, 0x00, 0xff, 0x00, 0xff, 0x00, 0xff,
+0xff, 0x00, 
+0xff, 0x00, 
+0xff, 0x00, 
+0xff, 0x00, 
+0xff, 0x00, 
+0xff, 0x00,
+0xff, 0x00, 
+0xff, 0x00, 
+0x00, 0xff, 0x00, 0xff, 0x00, 0xff, 0x00, 0xff,
 0x00, 0xff, 0x00, 0xff, 0x00, 0xff, 0x00, 0xff } ;
 
 int main(int argc, char *argv[])
@@ -37,7 +44,7 @@ int main(int argc, char *argv[])
     char *icon_name = "Uc";
     int screen_num, done;
     unsigned long valuemask;
-    Pixmap back;
+    Pixmap back, back1, back2;
     int count;
 
     /* 1. открыть соединенте с сервером X window */
@@ -109,6 +116,16 @@ int main(int argc, char *argv[])
                           InputOutput,
                           DefaultVisual(mydisplay, screen_num),
                           valuemask, &myat);
+
+    back1 = XCreatePixmapFromBitmapData(mydisplay, win1,
+                                    (char*) backing_bits, backing_width, backing_height,
+                                    0xFF00FF00,
+                                    //BlackPixel(mydisplay, screen_num),
+                                    0xFF0000FF,
+                                    //WhitePixel(mydisplay, screen_num), 
+                                    DefaultDepth(mydisplay, screen_num));                        
+
+    XSetWindowBackgroundPixmap(mydisplay, win1, back1);                      
     win2 = XCreateWindow(mydisplay, mywindow, 
                           100, 150, 150, 30, 2,
                           DefaultDepth(mydisplay, screen_num),
