@@ -5,6 +5,9 @@
 static void activate(GtkApplication *app, gpointer *user_data)
 {
     GtkWidget *window;
+    GtkWidget *fixed;
+    GtkWidget *button1;
+    GtkWidget *button2;
     GError *err = NULL;
     
     window = gtk_application_window_new(app);
@@ -12,11 +15,17 @@ static void activate(GtkApplication *app, gpointer *user_data)
     gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
     gtk_window_set_default_size(GTK_WINDOW(window), 800, 600);
     gtk_window_set_default_icon_from_file("android.png", &err);
-    gtk_window_set_resizable(GTK_WINDOW(window), FALSE);
+    //gtk_window_set_resizable(GTK_WINDOW(window), FALSE);
     if (err != NULL)
     {
         printf("Ошибка загрузки иконки %s\n", err->message);
     }
+    fixed = gtk_fixed_new();
+    gtk_container_add(GTK_CONTAINER(window), fixed);
+    button1 = gtk_button_new_with_label("button 1");
+    button2 = gtk_button_new_with_label("button 2");
+
+
     
     gtk_widget_show_all(window);
 }
