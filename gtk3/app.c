@@ -1,13 +1,26 @@
-#include <gtk/gtk.h>
-#include <stdio.h>
+#include "app.h"
 
+#include "views/table.h"
+#include "views/menu.h"
+
+GtkWidget *window;
+GtkApplication *app;
+
+GtkWidget *get_main_window()
+{
+    return window;
+}
+
+GtkApplication *get_appliation() 
+{
+    return app;
+}
 
 static void activate(GtkApplication *app, gpointer *user_data)
 {
-    GtkWidget *window;
-    GtkWidget *fixed;
-    GtkWidget *button1;
-    GtkWidget *button2;
+    GtkWidget *table;
+    GtkWidget *menu_bar;
+    GtkWidget *vbox;
     GError *err = NULL;
     
     window = gtk_application_window_new(app);
@@ -20,19 +33,20 @@ static void activate(GtkApplication *app, gpointer *user_data)
     {
         printf("Ошибка загрузки иконки %s\n", err->message);
     }
-    fixed = gtk_fixed_new();
-    gtk_container_add(GTK_CONTAINER(window), fixed);
-    button1 = gtk_button_new_with_label("button 1");
-    button2 = gtk_button_new_with_label("button 2");
-
-
     
+    menu_bar = create_menu();
+    table = create_table(window);
+    vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    gtk_box_pack_start(GTK_BOX(vbox), menu_bar, FALSE, TRUE, 0);
+    gtk_box_pack_start(GTK_BOX(vbox), table, TRUE, TRUE, 0);
+
+    gtk_container_add(GTK_CONTAINER(window), vbox);
     gtk_widget_show_all(window);
 }
 
 int main(int argc, char** argv) 
 {
-    GtkApplication *app;
+    
     int ret;
 
     app = gtk_application_new("db.staffs", G_APPLICATION_FLAGS_NONE);

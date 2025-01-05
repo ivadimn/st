@@ -25,7 +25,7 @@ char output_buffer[BUFF_SIZE] = {0};
 bool clear_buffer = false;
 bool add = false;
 bool mul = false;
-bool div = false;
+bool divv = false;
 bool sub = false;
 
 float result = 0.0;
@@ -35,6 +35,103 @@ int count = 0;
 static void calculate(GtkButton *button, gpointer data)
 {
     const gchar* text = gtk_button_get_label(button);
+    if((strcmp("+", text) == 0) || (strcmp("-", text) == 0) || (strcmp("/", text) == 0) || 
+        (strcmp("*", text) == 0) || (strcmp("=", text) == 0))
+    {
+        num[count] = atof(input_buffer);
+        count++;
+        clear_buffer = true;
+        if (strcmp("+", text) == 0)
+        {
+            add = true;
+        }
+        if (strcmp("-", text) == 0)
+        {
+            sub = true;
+        }
+        if (strcmp("*", text) == 0)
+        {
+            mul = true;
+        }
+        if (strcmp("/", text) == 0)
+        {
+            divv = true;
+        }
+    }
+    if (strcmp("=", text) == 0)
+    {
+        int x = sizeof(num) / sizeof(num[0]);
+        if (add)
+        {
+            for (int i = 0; i < x; i++)
+            {
+                result += num[i];
+            }
+            
+        }
+        if (divv)
+        {
+            result = num[0] / num[1];
+        }
+        if (sub)
+        {
+            if (result == 0.0)
+            {
+                result = num[0] * 2;
+            }
+            for (int i = 0; i < x; i++)
+            {
+                result -= num[i];
+            }
+        }
+        if (mul)
+        {
+            result = num[0] * num[1];
+        }
+        
+        add = false;
+        mul = false;
+        divv = false;
+        sub = false;
+
+        gtk_entry_set_text(GTK_ENTRY(box), "");
+        sprintf(output_buffer, "%.3f", result);
+        gtk_entry_set_text(GTK_ENTRY(box), output_buffer);
+        result = 0.0;
+    }
+    else {
+        if (clear_buffer)
+        {
+            memset(input_buffer, 0, strlen(input_buffer));
+            clear_buffer = false;
+        }
+        else {
+            strncat(input_buffer, text, 1);
+        }
+        strncat(output_buffer, text, 1);
+        gtk_entry_set_text(GTK_ENTRY(box), output_buffer);
+    }
+
+    if (strcmp("C", text) == 0)
+    {
+        gtk_entry_set_text(GTK_ENTRY(box), "");
+        memset(input_buffer, 0, strlen(input_buffer));
+        memset(output_buffer, 0, strlen(output_buffer));
+        clear_buffer = false;
+
+        count = 0;
+        int x = sizeof(num) / sizeof(num[0]);
+        for (int i = 0; i < x; i++)
+        {
+            num[i] = 0;
+        }
+
+        add = false;
+        mul = false;
+        divv = false;
+        sub = false;
+
+    }
 }
 
 static void activate(GtkApplication *app, gpointer user_data)
