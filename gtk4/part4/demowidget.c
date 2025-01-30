@@ -71,8 +71,9 @@ struct _DemoWidget
     * кнопку. Здесь вы *используете* указатели, когда хотите включить другие
     * объекты в структуру.
     */
-   GtkWidget *button;
-   guint timeout;
+   //GtkWidget *button;
+   //guint timeout;
+   char *label;
 };
 
 /*
@@ -301,9 +302,14 @@ static void demo_widget_class_init(DemoWidgetClass *klass)
                     GTK_TYPE_BOX_LAYOUT);
 }
 
+/* PUBLIC METHOD Declaration */
 void demo_widget_set_label(DemoWidget *self, const char *label)
 {
-    gtk_button_set_label(GTK_BUTTON(self->button),label);
+    g_clear_pointer(&self->label, g_free);
+    self->label = g_strdup(label);
+    //gtk_button_set_label(GTK_BUTTON(self->button),label);
+
+    gtk_widget_queue_draw(GTK_WIDGET(self));
     g_object_notify_by_pspec(G_OBJECT(self), properties[PROP_LABEL]);
 }
 

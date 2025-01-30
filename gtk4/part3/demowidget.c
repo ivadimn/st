@@ -28,6 +28,7 @@ enum property_types
 static GParamSpec *properties[N_PROPERTIES];
 
 /* GLOBAL FOR SIGNALS */
+/* возможные типы сигналов */
 enum signal_types
 {
     FOOBAR,
@@ -92,6 +93,7 @@ G_DEFINE_TYPE(DemoWidget, demo_widget, GTK_TYPE_WIDGET)
 static gboolean foobar_signal_source_func(gpointer user_data)
 {
     DemoWidget *self = DEMO_WIDGET(user_data);
+    g_print("Передать сигнал FOOBAR (g_signal_emit)\n");
     g_signal_emit(self, signals[FOOBAR], 0);
 
     return G_SOURCE_CONTINUE;
@@ -151,6 +153,7 @@ static void demo_widget_get_property(GObject *object,
 static void demo_widget_init(DemoWidget *self)
 {
     /* Не обязательно, но это полезное сокращение. */
+    g_print("Инициализация виджета demo\n");
     GtkWidget *widget = GTK_WIDGET(self);
     
     self->button = gtk_button_new_with_label("Hello world!");
@@ -158,7 +161,7 @@ static void demo_widget_init(DemoWidget *self)
     gtk_widget_set_parent(self->button, widget);
 
     /* испустить наш сигнал */
-
+    g_print("Запустить передачу сигнала FOOBAR (g_timeout_add)\n");
     self->timeout = g_timeout_add(5000, foobar_signal_source_func, self);
 }
 
@@ -206,7 +209,7 @@ static void demo_widget_dispose(GObject *object)
     * автоматически генерируется макросами - согласно gtype.h, это статическая
     * переменная, указывающая на родительский класс.
    */
-
+    g_print("dispose demo\n");
     G_OBJECT_CLASS(demo_widget_parent_class)->dispose(object);
 }
 
@@ -219,6 +222,7 @@ static void demo_widget_dispose(GObject *object)
 static void demo_widget_finalize(GObject *object)
 {
     DemoWidget *self = DEMO_WIDGET(object);
+    g_print("finalize demo\n");
     if (self->timeout)
     {
         g_source_remove(self->timeout);
@@ -255,6 +259,7 @@ static void demo_widget_finalize(GObject *object)
 static void demo_widget_class_init(DemoWidgetClass *klass)
 {
     /* Создайте стенографию, чтобы избежать некоторых приведений. */
+    g_print("Инициализация класса demo\n");
     GObjectClass *object_class = G_OBJECT_CLASS(klass);
     GParamFlags default_flags = 
         G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY;
@@ -272,6 +277,7 @@ static void demo_widget_class_init(DemoWidgetClass *klass)
 
     /* свойства */
 
+    g_print("Создать текстовое свойсво класса demo\n");
     properties[PROP_LABEL] = g_param_spec_string("label",
             "Button lable",
             "Textual label for our lovely button",
@@ -282,6 +288,7 @@ static void demo_widget_class_init(DemoWidgetClass *klass)
 
     /* сигналы */
 
+    g_print("Создать типы сигналов для класса demo\n");
     signals[FOOBAR] = g_signal_new_class_handler("foobar",
                         G_OBJECT_CLASS_TYPE(object_class), 
                         G_SIGNAL_RUN_LAST,
@@ -319,6 +326,7 @@ void demo_widget_set_label(DemoWidget *self, const char *label)
 
 GtkWidget* demo_widget_new()
 {
+    g_print("Создание объекта виджета demo (new)\n");
     return g_object_new(DEMO_TYPE_WIDGET, NULL);
 }
 
