@@ -30,7 +30,7 @@ static GParamSpec *properties[N_PROPERTIES];
 /* GLOBAL FOR SIGNALS */
 enum signal_types
 {
-    FOOBAR,
+    TOGGLED,
     LAST_SIGNAL
 };
 
@@ -71,9 +71,11 @@ struct _DemoWidget
     * кнопку. Здесь вы *используете* указатели, когда хотите включить другие
     * объекты в структуру.
     */
-   //GtkWidget *button;
-   //guint timeout;
-   char *label;
+    char *label;
+    PangoLayout *layout;
+    GdkRectangle layout_rect;
+    gboolean label_selected;
+    GtkGesture *gesture;
 };
 
 /*
@@ -89,14 +91,6 @@ struct _DemoWidget
 G_DEFINE_TYPE(DemoWidget, demo_widget, GTK_TYPE_WIDGET)
 
 /* PRIVATE INTERNAL FUNCTIONS */
-
-static gboolean foobar_signal_source_func(gpointer user_data)
-{
-    DemoWidget *self = DEMO_WIDGET(user_data);
-    g_signal_emit(self, signals[FOOBAR], 0);
-
-    return G_SOURCE_CONTINUE;
-}
 
 /* PROPERTIES - GETTERS AND SETTERS*/
 
@@ -131,8 +125,7 @@ static void demo_widget_get_property(GObject *object,
     switch (property_id)
     {
     case PROP_LABEL:
-        g_value_set_string(value,
-                    gtk_button_get_label(GTK_BUTTON(self->button)));
+        g_value_set_string(value, demo_widget_get_label(self));
         break;
     
     default:
@@ -141,6 +134,113 @@ static void demo_widget_get_property(GObject *object,
     }
 }
 
+/* _snapshot helper function */
+static void render_highlights(DemoWidget *self, GtkSnapshot *snapshot)
+{
+    GtkStyleContext *context;
+    graphene_rect_t grect;
+
+    context = gtk_widget_get_style_context(GTK_WIDGET(self));
+    grect = GRAPHENE_RECT_INIT(
+            self->layout_rect.x,
+            self->layout_rect.y,
+            self->layout_rect.width,
+            self->layout_rect.height);
+
+    gtk_style_context_save(context);
+    gtk_style_context_set_state(context, GTK_STATE_FLAG_SELECTED);
+    gtk_snapshot_push_clip(snapshot, &grect);
+    gtk_snapshot_render_background(snapshot, context,
+            self->layout_rect.x,
+            self->layout_rect.y,
+            graphene_rect_get_width(&grect),
+            graphene_rect_get_height(&grect));
+    gtk_snapshot_render_layout(snapshot, context,
+            self->layout_rect.x,
+            self->layout_rect.y,
+            self->layout);
+    gtk_snapshot_pop(snapshot);
+    gtk_style_context_restore(context);
+}
+
+
+
+static void demo_widget_snapshot(GtkWidget *widget, GtkSnapshot *snapshot)
+{
+    DemoWidget *self = DEMO_WIDGET(widget);
+
+    /* Style/CSS provider object*/
+    /* 
+    это объект, реализующий интерфейс `GtkStyleProvider` для CSS. Он способен анализировать ввод, 
+    похожий на CSS, в ...
+    */
+    GtkCssProvider *provider;
+
+    /*Style metadata*/
+    /*
+    хранит информацию о стиле, влияющую на виджет. 
+    Чтобы сформировать окончательную информацию о стиле, `GtkStyleContext` запрашивает информацию ...
+    */
+    GtkStyleContext *context;
+
+    /* Тоже самое, что GtkRectangle */
+    GtkAllocation allocation;
+ 
+
+    /*
+    Возвращает контекст стиля, связанный с виджетом. Возвращаемый объект гарантированно будет одинаковым для ...
+    */
+    context = gtk_widget_get_style_context(widget);
+    gtk_style_context_add_class(context, "view");
+
+    provider = gtk_css_provider_new();
+    gtk_css_provider_load_from_data(provider,
+                        "#demowidget {\n"
+                        "  border: 5px solid red;\n"
+                        "}\n",
+                        -1);
+    gtk_style_context_add_provider(context, 
+            GTK_STYLE_PROVIDER(provider),
+            GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+    
+    gtk_widget_get_allocation(widget, &allocation);
+
+    /*
+    * Отрисовка нашего фона и текста (label)
+    */
+    gtk_snapshot_render_background(snapshot, context,
+                /* double x */      allocation.x,
+                /* double y */      allocation.y,
+                /* double width */  allocation.width,
+                /* double height */  allocation.height);
+    gtk_snapshot_render_layout(snapshot, context,
+                /* double x */      allocation.x,
+                /* double y */      allocation.y,
+                self->layout);
+
+    if (self->label_selected)
+        render_highlights(self, snapshot);
+                
+}
+
+/* Функции обратного вызова для select */
+
+static void gesture_released_cb(GtkGestureClick *gesture,
+            int n_press,
+            double x,
+            double y,
+            gpointer user_data)
+{
+    DemoWidget *self = DEMO_WIDGET(user_data);
+
+    if(x <= self->layout_rect.width && y <= self->layout_rect.height)
+    {
+        demo_widget_toggle_selection(self);
+    }
+        
+}
+
+/* CONSTRUCTORS AND DESTRUCTORS */
 /* METHOD DEFINITIONS */
 
 /*
@@ -154,13 +254,18 @@ static void demo_widget_init(DemoWidget *self)
     /* Не обязательно, но это полезное сокращение. */
     GtkWidget *widget = GTK_WIDGET(self);
     
-    self->button = gtk_button_new_with_label("Hello world!");
-    gtk_widget_set_hexpand(self->button, TRUE);
-    gtk_widget_set_parent(self->button, widget);
+    /* Задаёт имя виджета. Указание имени позволяет ссылаться на виджет из файла CSS. ... */
+    gtk_widget_set_name(widget, "demowidget");
 
-    /* испустить наш сигнал */
+    /* Pango layout для отрисовки текста */
+    self->layout = gtk_widget_create_pango_layout(widget, NULL);
 
-    self->timeout = g_timeout_add(5000, foobar_signal_source_func, self);
+    /* Инициализация жестов (click)*/
+    self->gesture = gtk_gesture_click_new();
+    g_signal_connect(self->gesture, "released", G_CALLBACK(gesture_released_cb), self);
+    gtk_widget_add_controller(widget, GTK_EVENT_CONTROLLER(self->gesture));
+    
+
 }
 
 /*
@@ -185,6 +290,8 @@ static void demo_widget_dispose(GObject *object)
 {
     DemoWidget *self = DEMO_WIDGET(object);
 
+    g_clear_pointer(&self->label, g_free);
+
     /*
     * g_clear_pointer — очень полезная функция. Она вызывает функцию по вашему выбору,
     * чтобы отменить ссылку или освободить указатель, а затем устанавливает этот указатель в NULL.
@@ -198,7 +305,7 @@ static void demo_widget_dispose(GObject *object)
     * простой gpointer. Это необходимо для того, чтобы функция обнулила
     * указатель.
     */
-   g_clear_pointer(&self->button, gtk_widget_unparent);
+   //g_clear_pointer(&self->button, gtk_widget_unparent);
 
    /*
     * Последний шаг: цепочка (шаблон)
@@ -220,11 +327,9 @@ static void demo_widget_dispose(GObject *object)
 static void demo_widget_finalize(GObject *object)
 {
     DemoWidget *self = DEMO_WIDGET(object);
-    if (self->timeout)
-    {
-        g_source_remove(self->timeout);
-    }
-    
+
+    g_clear_pointer(&self->label, g_free);
+
     
     /* --- */
 
@@ -257,6 +362,7 @@ static void demo_widget_class_init(DemoWidgetClass *klass)
 {
     /* Создайте стенографию, чтобы избежать некоторых приведений. */
     GObjectClass *object_class = G_OBJECT_CLASS(klass);
+    GtkWidgetClass *widget_class = GTK_WIDGET_CLASS(klass);
     GParamFlags default_flags = 
         G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY;
 
@@ -271,6 +377,8 @@ static void demo_widget_class_init(DemoWidgetClass *klass)
     object_class->set_property = demo_widget_set_property;
     object_class->get_property = demo_widget_get_property;
 
+    widget_class->snapshot = demo_widget_snapshot;
+
     /* свойства */
 
     properties[PROP_LABEL] = g_param_spec_string("label",
@@ -283,7 +391,7 @@ static void demo_widget_class_init(DemoWidgetClass *klass)
 
     /* сигналы */
 
-    signals[FOOBAR] = g_signal_new_class_handler("foobar",
+    signals[TOGGLED] = g_signal_new_class_handler("toggled",
                         G_OBJECT_CLASS_TYPE(object_class), 
                         G_SIGNAL_RUN_LAST,
                         /* нет функции обработки по умолчанию */
@@ -305,12 +413,31 @@ static void demo_widget_class_init(DemoWidgetClass *klass)
 /* PUBLIC METHOD Declaration */
 void demo_widget_set_label(DemoWidget *self, const char *label)
 {
+    int label_width = 0, label_height = 0;
+
     g_clear_pointer(&self->label, g_free);
     self->label = g_strdup(label);
-    //gtk_button_set_label(GTK_BUTTON(self->button),label);
+    
+    /* обновляем pango layout */
+    pango_layout_set_text(self->layout, self->label, -1);
+    pango_layout_get_size(self->layout, &label_width, &label_height);
+    self->layout_rect.width = label_width / PANGO_SCALE;
+    self->layout_rect.height = label_height / PANGO_SCALE;
 
     gtk_widget_queue_draw(GTK_WIDGET(self));
     g_object_notify_by_pspec(G_OBJECT(self), properties[PROP_LABEL]);
+}
+
+const char* demo_widget_get_label(DemoWidget *self)
+{
+    return self->label;
+}
+
+void demo_widget_toggle_selection(DemoWidget *self)
+{
+    self->label_selected = self->label_selected ? FALSE : TRUE;
+    gtk_widget_queue_draw(GTK_WIDGET(self));
+    g_signal_emit(self, signals[TOGGLED], 0);
 }
 
 /*
