@@ -24,18 +24,64 @@ typedef struct {
 } vstr_array_t;
 
 
+/*
+* создать строку
+* size - максимальная длина строки
+*/
 
 vstr_t* vstr_create(long size);
-vstr_t* vstr_plus(long count, ...);
+/*
+* уничтожить строку  
+*/
 void vstr_free(vstr_t* str);
+
+/* сложить строки
+* переменное число аргументов char*
+*/
+vstr_t* vstr_plus(long count, ...);
+
+/*
+* очищает строку заполняя её нулями
+*/
 void vstr_clear(vstr_t* str);
+
+/*
+* возвращает размер буфера для строки
+*/
 size_t vstr_size(vstr_t* str);
+
+/*
+* возвращает текущую длину строки
+*/
 size_t vstr_len(vstr_t* str);
+
+/*
+* напечатать строку
+*/
 void vstr_print(vstr_t* str, FILE* f);
+
+/*
+* печатает 16 представление символов в строке
+*/
 void vstr_print_data(vstr_t* str, FILE* f);
+
+/*
+* присваивает созданной уже строке новое значенине
+* если выделенный под строку буфер меньше длины новой строки
+* то ничего не происходит
+*/
 void vstr_assign(vstr_t *str, const char* value);
+
+/*
+* создаёт объектс vstr из массива символов 
+*/
 vstr_t* vstr_dup(const char* source);
+
+/*
+* выполняет конкатенацию двух строк и возвращает новую строку
+*/
 vstr_t* vstr_concat(vstr_t* left, vstr_t* right);
+
 /* добавляет к строке набор байт возвращает новую строкуб старую строку удаляет*/
 vstr_t* vstr_append(vstr_t* left, const char* right);
 void vstr_split(vstr_array_t* arr, vstr_t* str, char* delim, vstr_t* g_open, vstr_t* g_close);

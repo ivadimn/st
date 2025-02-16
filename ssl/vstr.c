@@ -12,6 +12,9 @@ static long inhex(uint8_t ch) {
     return -1;
 }
 
+/*
+* создаёт строку размером ышяу
+*/
 vstr_t* vstr_create(long size) {
     vstr_t* str = (vstr_t*) malloc(sizeof(vstr_t));
     if (str == NULL)
@@ -28,11 +31,16 @@ vstr_t* vstr_create(long size) {
     return str;
 }
 
+/* сложить строки
+* переменное число аргументов char*
+* возвращает строку созданную путём сложения входных аргументов 
+*/
 vstr_t* vstr_plus(long count, ...) {
     long len = 0;
     long len_vals[count];
     va_list ap; 
     vstr_t* str = NULL;        
+    //вычисляем суммарную длину создаваемой строки
     va_start(ap, count);    
     for(long i = 0; i < count; i++)  {
         len_vals[i] = strlen(va_arg(ap, char*));
@@ -52,29 +60,47 @@ vstr_t* vstr_plus(long count, ...) {
     return str;
 }
 
+/*
+* уничтожает строку и освоброждает память
+*/
 void vstr_free(vstr_t* str) {
     free(str->data);
     free(str);
 }
 
+/*
+* очищает строку заполняя её нулями
+*/
 void vstr_clear(vstr_t* str) {
     memset(str->data, 0, str->size);
     str->length = 0;
 }
 
+/*
+* возвращает размер буфера для строки
+*/
 size_t vstr_size(vstr_t* str) {
     return str->size;
 }
 
+/*
+* возвращает текущую длину строки
+*/
 size_t vstr_len(vstr_t* str) {
     return str->length;
 }
 
+/*
+* напечатать строку
+*/
 void vstr_print(vstr_t* str, FILE* f) {
     fwrite(str->data, sizeof(uint8_t), str->length, f);
     fwrite("\n", 1, 1, f);
 }
 
+/*
+* печатает 16 представление символов в строке
+*/
 void vstr_print_data(vstr_t* str, FILE* f) {
     for (long i = 0; i < str->length; i++) {
         fprintf(f, "%x ", str->data[i]);
@@ -82,6 +108,11 @@ void vstr_print_data(vstr_t* str, FILE* f) {
     fprintf(f, "\n");
 }
 
+/*
+* присваивает созданной уже строке новое значенине
+* если выделенный под строку буфер меньше длины новой строки
+* то ничего не происходит
+*/
 void vstr_assign(vstr_t *str, const char* value) {
     uint8_t* tmp = (uint8_t*) value;
     long len = strlen(value);
@@ -92,6 +123,9 @@ void vstr_assign(vstr_t *str, const char* value) {
     }
 }
 
+/*
+* создаёт объектс vstr из массива символов 
+*/
 vstr_t* vstr_dup(const char* source) {
     size_t len = strlen(source);
     vstr_t* dest = vstr_create(len);
@@ -102,6 +136,9 @@ vstr_t* vstr_dup(const char* source) {
     return dest;
 }
 
+/*
+* выполняет конкатенацию двух строк и возвращает новую строку
+*/
 vstr_t* vstr_concat(vstr_t* left, vstr_t* right) {
     vstr_t *str = vstr_create(left->length + right->length);
     if (str == NULL)
@@ -113,6 +150,8 @@ vstr_t* vstr_concat(vstr_t* left, vstr_t* right) {
     return str;
 }
 
+
+/* добавляет к строке набор байт возвращает новую строкуб старую строку удаляет*/
 vstr_t* vstr_append(vstr_t* left, const char* right) {
     vstr_t *str = NULL;
     long len_r = strlen(right);
