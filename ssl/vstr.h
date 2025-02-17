@@ -84,10 +84,22 @@ vstr_t* vstr_concat(vstr_t* left, vstr_t* right);
 
 /* добавляет к строке набор байт возвращает новую строкуб старую строку удаляет*/
 vstr_t* vstr_append(vstr_t* left, const char* right);
+
+
 void vstr_split(vstr_array_t* arr, vstr_t* str, char* delim, vstr_t* g_open, vstr_t* g_close);
+
+/*
+* Возвращает индекс вхождения символа в строку или -1
+*/
 long vstr_in(vstr_t *str, char ch);
+
+
 long vstr_instr(vstr_t *str, char* s);
 vstr_t* vstr_substr(vstr_t *str, long start, long end);
+
+/*
+* Возвращает символ по заданному индексу или 0
+*/
 uint8_t vstr_at(vstr_t *str, long index);
 void vstr_put_ch(vstr_t *str, char ch);
 void vstr_urldecode(vstr_t *str);

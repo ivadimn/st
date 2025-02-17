@@ -13,7 +13,7 @@ static long inhex(uint8_t ch) {
 }
 
 /*
-* создаёт строку размером ышяу
+* создаёт строку размером size
 */
 vstr_t* vstr_create(long size) {
     vstr_t* str = (vstr_t*) malloc(sizeof(vstr_t));
@@ -171,6 +171,9 @@ vstr_t* vstr_append(vstr_t* left, const char* right) {
     return str;
 }
 
+/*
+* Возвращает индекс вхождения символа в строку или -1
+*/
 long vstr_in(vstr_t *str, char ch) {
     for (long i = 0; i < str->length; i++)  {
         if (str->data[i] == ch)
@@ -179,6 +182,9 @@ long vstr_in(vstr_t *str, char ch) {
     return -1;
 }
 
+/*
+* Возвращает символ по заданному индексу или 0
+*/
 uint8_t vstr_at(vstr_t *str, long index) {
     if (index < str->length)
         return str->data[index];
