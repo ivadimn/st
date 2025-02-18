@@ -27,7 +27,6 @@ vstr_t* vstr_create(long size) {
     memset(str->data, 0, sizeof(uint8_t) * (size + 1));
     str->size = size + 1;
     str->length = 0;
-
     return str;
 }
 
@@ -192,26 +191,43 @@ uint8_t vstr_at(vstr_t *str, long index) {
     
 }
 
+/*
+* ищет первое вхождение подстроки в строку и возвращает
+* индекс вхождения или -1 если подстрока не найдена  
+*/
 long vstr_instr(vstr_t *str, char* s) {
     char* tmp = (char*)str->data;
     long len = (long)strlen(s);
     if (str->length < len)
         return -1;
     
-    for (long index = 0; index < str->length - len; index++) {
+    for (long index = 0; index <= str->length - len; index++) {
         if (strncmp(&tmp[index], s, (size_t) len) == 0)
             return index;
     }
     return -1;
 }
 
+/*
+* выделяет и возвращает подстроку из строки по индексам
+* начала и окончания
+*/
 vstr_t* vstr_substr(vstr_t *str, long start, long end) {
     long len = end - start;
     vstr_t* substr = NULL;
+
+    if (start > str->length - 1 || end >= str->length)
+        return NULL;
+    printf("1 IF\n");
     if(len < 1)
         return NULL;
-    substr = vstr_create(len);    
+    printf("2 IF\n");
+    
+    printf("%ld\n", len);    
+    substr = vstr_create(len);
+    printf("created\n");    
     for (long i = 0; i < len; i++) {
+        printf("%ld\n", i);
         substr->data[i] = str->data[start + i];
     }
     substr->length = len;

@@ -93,7 +93,10 @@ void vstr_split(vstr_array_t* arr, vstr_t* str, char* delim, vstr_t* g_open, vst
 */
 long vstr_in(vstr_t *str, char ch);
 
-
+/*
+* ищет первое вхождение подстроки в строку и возвращает
+* индекс вхождения или -1 если подстрока не найдена  
+*/
 long vstr_instr(vstr_t *str, char* s);
 vstr_t* vstr_substr(vstr_t *str, long start, long end);
 
@@ -101,6 +104,8 @@ vstr_t* vstr_substr(vstr_t *str, long start, long end);
 * Возвращает символ по заданному индексу или 0
 */
 uint8_t vstr_at(vstr_t *str, long index);
+
+
 void vstr_put_ch(vstr_t *str, char ch);
 void vstr_urldecode(vstr_t *str);
 void vstr_cut(vstr_t* str, long count, int where);
