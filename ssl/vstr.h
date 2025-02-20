@@ -86,7 +86,13 @@ vstr_t* vstr_concat(vstr_t* left, vstr_t* right);
 vstr_t* vstr_append(vstr_t* left, const char* right);
 
 
+/*
+* разбивает строку на массив строк по разделителю, с учётом группировки 
+* если часть строки сгруппирована, то символы разделителя там не работают
+* и выделяется группа целиком
+*/
 void vstr_split(vstr_array_t* arr, vstr_t* str, char* delim, vstr_t* g_open, vstr_t* g_close);
+void vstr_split1(vstr_array_t* arr, vstr_t* str, char* delim, vstr_t* g_open, vstr_t* g_close);
 
 /*
 * Возвращает индекс вхождения символа в строку или -1
