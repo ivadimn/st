@@ -5,8 +5,10 @@
 #include "file_info.h"
 #include "vstr.h"
 
-const char *line = "80.82.70.140 - - [19/Jul/2020:07:31:03 +0000] \"GET / HTTP/1.1\" 503 206 \"http://77.244.214.49:80/left.html\" "\
+const char *line = "80.82.70.140 - - [19/Jul/2020:07:31:03 +0000]  \"GET /%D0%BE%D0%B4%D0%BD%D0%B0%D0%B6%D0%B4%D1%8B HTTP/1.1\" 503 206  \"http://77.244.214.49:80/left.html\" "\
 "\"Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:77.0) Gecko/20100101 Firefox/77.0\" \"-\"";
+const char *line2 = "Pete Ivanov;250000;начальник Управления";
+const char *url = "%D0%BE%D0%B4%D0%BD%D0%B0%D0%B6%D0%B4%D1%8B";
 
 int main(int argc, char** argv)
 {
@@ -16,12 +18,17 @@ int main(int argc, char** argv)
     
     vstr_t* go = vstr_dup("\"[");
     vstr_t* gc = vstr_dup("\"]");
-    vstr_t* l = vstr_dup(line);
+    vstr_t* l = vstr_dup(line2);
     vstr_print(l, stdout);
     vstr_array_t* arr = vstr_array_create(10);
-    vstr_split(arr, l, " ", go, gc);
+    //vstr_split1(arr, l, " ", go, gc);
+    vstr_split(arr, l, ";", NULL, NULL);
     //printf("сделано\n");
     vstr_array_print(arr, stdout);
+
+    vstr_assign(l, url);
+    vstr_urldecode(l);
+    vstr_print(l, stdout);
 
     vstr_free(l);
     vstr_free(go);

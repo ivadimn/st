@@ -92,7 +92,6 @@ vstr_t* vstr_append(vstr_t* left, const char* right);
 * и выделяется группа целиком
 */
 void vstr_split(vstr_array_t* arr, vstr_t* str, char* delim, vstr_t* g_open, vstr_t* g_close);
-void vstr_split1(vstr_array_t* arr, vstr_t* str, char* delim, vstr_t* g_open, vstr_t* g_close);
 
 /*
 * Возвращает индекс вхождения символа в строку или -1
@@ -111,8 +110,14 @@ vstr_t* vstr_substr(vstr_t *str, long start, long end);
 */
 uint8_t vstr_at(vstr_t *str, long index);
 
-
+/*
+* помещает символ в строку
+*/
 void vstr_put_ch(vstr_t *str, char ch);
+
+/*
+* декодтрует 
+*/
 void vstr_urldecode(vstr_t *str);
 void vstr_cut(vstr_t* str, long count, int where);
 

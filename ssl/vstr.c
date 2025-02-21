@@ -231,6 +231,11 @@ vstr_t* vstr_substr(vstr_t *str, long start, long end) {
     return substr;
 }
 
+/*
+* разбивает строки на подстроки по разделителю возвращает массив полстрок
+* подстроки могут быть сгруппированы символами группировки тогда
+* группа включается в массив как подстрока
+*/
 void vstr_split(vstr_array_t* arr, vstr_t* str, char* delim, vstr_t* g_open, vstr_t* g_close) {
     long len = str->length, index = 0;
     uint8_t* buf = str->data;
@@ -250,72 +255,26 @@ void vstr_split(vstr_array_t* arr, vstr_t* str, char* delim, vstr_t* g_open, vst
                         part[index] = '\0';
                         vstr_array_adds(arr, (char*)part);
                         index = 0;
-                        is_delim = 1;                        
+                        is_delim = 1;
                     }
-                } 
-                else if(g_open && (g_index = vstr_in(g_open, buf[i])) >= 0) {
-                    in_group = 1;
                 }
                 else {
-                    part[index++] = buf[i];
                     is_delim = 0;
+                }
+
+                if(g_open && (g_index = vstr_in(g_open, buf[i])) >= 0) {
+                    in_group = 1;
+                    is_delim = 1;
+                } 
+                else if (!is_delim)  {
+                    part[index++] = buf[i];
                 }
                 break;
             case 1:
                 if (buf[i] == vstr_at(g_close, g_index)) {
-                    in_group = 0;
-                    g_index = -1;
-                }
-                else {
-                    part[index++] = buf[i];
-                }
-                break;
-            default:
-                break;
-        }
-
-    }
-    if (index > 0) {
-        part[index] = '\0';
-        vstr_array_adds(arr, (char*)part);    
-    }
-    vstr_free(dlms);
-    free(part);
-}
-
-
-void vstr_split1(vstr_array_t* arr, vstr_t* str, char* delim, vstr_t* g_open, vstr_t* g_close) {
-    long len = str->length, index = 0;
-    uint8_t* buf = str->data;
-    uint8_t in_group = 0;
-    long g_index = -1;
-    int is_delim = 0;
-    vstr_t* dlms = vstr_dup(delim);
-
-    uint8_t *part = (uint8_t*) malloc(sizeof(uint8_t) * MAX_PART);
-        
-    for (long i = 0; i < len; i++) {
-        
-        switch (in_group)  {
-            case 0:
-                if (vstr_in(dlms, buf[i]) >= 0) {
-                    if (!is_delim) {
-                        part[index] = '\0';
-                        vstr_array_adds(arr, (char*)part);
-                        index = 0;
-                        is_delim = 1;                        
-                    }
-                } 
-                else if(g_open && (g_index = vstr_in(g_open, buf[i])) >= 0) {
-                    in_group = 1;
-                }
-                else {
-                    part[index++] = buf[i];
-                    is_delim = 0;
-                }
-                break;
-            case 1:
-                if (buf[i] == vstr_at(g_close, g_index)) {
+                    part[index] = '\0';
+                    vstr_array_adds(arr, (char*)part);
+                    index = 0;
                     in_group = 0;
                     g_index = -1;
                 }
