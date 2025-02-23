@@ -305,6 +305,9 @@ void vstr_put_ch(vstr_t *str, char ch) {
     }
 }
 
+/*
+* декодирует url строку в русские буквы
+*/
 void vstr_urldecode(vstr_t *str) {
     uint8_t buf[4096];
 	uint8_t ch;
@@ -345,6 +348,9 @@ void vstr_urldecode(vstr_t *str) {
     vstr_assign(str, (char*) buf);
 }
 
+/*
+* отсекает часть строки с начала или с конца
+*/
 void vstr_cut(vstr_t* str, long count, int where) {
     long start, end, index = 0;
     uint8_t* tmp = NULL;
@@ -367,6 +373,60 @@ void vstr_cut(vstr_t* str, long count, int where) {
     free(str->data);
     str->data = tmp;
     str->length -= count;
+}
+
+/*
+* заменяет символы в строки на на указанный символ
+* если символ 0 то просто удаляет символы из строки
+*/
+void vstr_replace(vstr_t* str, char* what, char c)
+{
+    size_t index = 0;
+    char* tmp = (char*) malloc(sizeof(char) * str->length);
+    vstr_t* w = vstr_dup(what);
+    for (long i = 0; i < str->length; i++)
+    {
+        if (vstr_in(w, str->data[i]) >= 0)
+        {
+            if (c > 0)
+                tmp[index++] = c;
+        }
+        else
+            tmp[index++] = str->data[i];
+    }
+    tmp[index] = '\0';
+    vstr_assign(str, tmp);
+}
+
+void vstr_tolower(vstr_t* str)
+{
+    uint8_t ch;
+    long index = 0;
+
+    while (index < str->length)
+    {
+         ch = str->data[index];
+         if (ch < 128)
+         {
+            ch = tolower(ch);
+            str->data[index++] = ch;
+         }
+         else
+         {
+            ch = str->data[index+1];
+            if (ch >= 0x90 && ch <= 0xaf)
+            {
+                str->data[index+1] = ch + 0x20;    
+            }
+            else if (ch == 0x81)
+                str->data[index+1] = 0x91;
+            
+            
+            printf("%x\n", str->data[index+1]);
+            str->data[index+1] += 0x20;
+            index += 2;
+         }
+    }
 }
 
 /*
@@ -412,6 +472,14 @@ void vstr_array_free(vstr_array_t* arr) {
     }
     free(arr->array);
     free(arr);
+}
+
+/*
+* возвращает длину массива
+*/
+long vstr_array_length(vstr_array_t* arr)
+{
+    return arr->length;
 }
 
 void vstr_array_clear(vstr_array_t* arr) {

@@ -7,17 +7,78 @@
 #include <sys/stat.h>
 #include <dirent.h>
 #include <fcntl.h>
+#include <sys/mman.h>
+#include <ctype.h>
 
-const char hex[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF};
+static vstr_array_t* get_lines(const char* buf)
+{
+    vstr_array_t *arr = vstr_array_create(DEFAULT_SIZE);
+    size_t index = 0;
 
-static long inhex(char ch) {
-	const char* hexch = "0123456789ABCDEF";
-	for (long i = 0; i < 16; i++)  {
-        if (hexch[i] == ch)
-            return i;
+    char* line = (char*) malloc(sizeof(char*) * LINE_SIZE);
+
+    while (*buf != '\0') {
+        if (*buf == '\n')  {
+            line[index] = '\0';
+            index = 0;
+            vstr_array_adds(arr, line);
+        }
+        else {
+            line[index++] = tolower(*buf);
+        }
+        buf++;
     }
-    return -1;
+    free(line);
+    return arr;
 }
+
+/*
+* читает текстовый файл и возвращает массив строк 
+*/
+vstr_array_t* get_strings_from_file(const char* filename)
+{
+    int fd;
+    size_t fsize;
+    char *fbuff = NULL;
+    int is_map = 0;
+    
+
+    fd = open(filename, O_RDONLY);
+    if (fd == -1) {
+        err("Ошибка открытия файла: %s", filename);
+        return NULL;
+    }
+    
+    fsize = get_file_size(fd);
+    if (fsize == 0) {
+        crit("Ошибка при определении размера файла: %s", filename);
+    }
+    if(fsize > MAX_FILE_SIZE) 
+    {
+        fbuff = (char*) mmap(NULL, fsize, PROT_READ, MAP_PRIVATE, fd, 0);
+        is_map = 1;
+    }    
+    else { 
+        fbuff = (char*) malloc(sizeof(char) * fsize);    
+        size_t readed = read(fd, fbuff, fsize);
+        if (readed < fsize)
+            crit("Ошибка стения файла: %s", filename);
+    }
+
+    if (fbuff == NULL) {
+        crit("Ошибка распределения памяти");
+    }
+        
+    vstr_array_t* lines = get_lines(fbuff);
+    if (is_map)
+        munmap(fbuff, fsize);
+    else
+        free(fbuff);
+    close(fd); 
+
+    return lines;   
+}
+
 
 /*
 * подготавливает массив размером count для списка файлов
@@ -58,7 +119,6 @@ size_t get_file_size(int fd) {
 	}
 	return fsize;
 }
-
 
 /*
 * проверяет является ли файл - каталогом

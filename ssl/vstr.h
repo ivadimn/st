@@ -9,6 +9,7 @@
 
 #define MAX_PART 8192
 typedef enum state { ONE, TWO } state_t;
+typedef uint16_t symbol;
 
 
 typedef struct {
@@ -119,10 +120,31 @@ void vstr_put_ch(vstr_t *str, char ch);
 * декодтрует 
 */
 void vstr_urldecode(vstr_t *str);
+
+/*
+* отсекает часть строки с начала или с конца
+*/
 void vstr_cut(vstr_t* str, long count, int where);
+
+/*
+* заменяет символы в строки на на указанный символ
+* если символ 0 то просто удаляет символы из строки
+*/
+void vstr_replace(vstr_t* str, char* what, char c);
+
+/*
+* преобразовывает символы строки в нижней регистр 
+*/
+void vstr_tolower(vstr_t* str);
 
 vstr_array_t* vstr_array_create(long size);
 void vstr_array_free(vstr_array_t* arr);
+
+/*
+* возвращает длину массива
+*/
+long vstr_array_length(vstr_array_t* arr);
+
 void vstr_array_clear(vstr_array_t* arr);
 long vstr_array_addv(vstr_array_t* arr, vstr_t* str);
 long vstr_array_adds(vstr_array_t* arr, const char* str);
