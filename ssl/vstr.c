@@ -418,12 +418,14 @@ void vstr_tolower(vstr_t* str)
             {
                 str->data[index+1] = ch + 0x20;    
             }
-            else if (ch == 0x81)
+            else if (ch == 0x81) {
+                str->data[index] = 0xd1;
                 str->data[index+1] = 0x91;
+            }
             
             
             printf("%x\n", str->data[index+1]);
-            str->data[index+1] += 0x20;
+            //str->data[index+1] += 0x20;
             index += 2;
          }
     }
