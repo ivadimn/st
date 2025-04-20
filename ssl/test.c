@@ -28,28 +28,17 @@ int main(int argc, char** argv)
     vstr_array_print(lines, stdout);
     vstr_array_free(lines); */
 
-    size_t len = strlen(buf);
-    printf("%ld\n", len);
-
-    for (size_t i = 0; i < len; i++)
-    {
-        printf("%2x ", buf[i]);
-    }
-    printf("\n");
-
-    uint16_t *ibuf = (uint16_t*) buf;
-    for (size_t i = 0; i < len / 2; i++)
-    {
-        printf("%x ", ibuf[i]);
-    }
-    printf("\n");
-
+    vstr_array_t *arr = vstr_array_create(5);
     
-    vstr_t* str = vstr_dup(buf);
-    vstr_print_data(str, stdout);
-    vstr_tolower(str);
-    vstr_print(str, stdout);
-    vstr_print_data(str, stdout);
-    vstr_free(str);
+    vstr_array_adds(arr, "1234567890");
+    vstr_array_adds(arr, "abcdefgh");
+    vstr_array_adds(arr, "абвгджеё");
+
+    vstr_array_print(arr, stdout);
+
+    vstr_t *s = vstr_array_join(arr, " ");
+    vstr_print(s, stdout);
+
+    vstr_array_free(arr);
     return 0;
 } 

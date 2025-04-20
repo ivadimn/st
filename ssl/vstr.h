@@ -137,7 +137,18 @@ void vstr_replace(vstr_t* str, char* what, char c);
 */
 void vstr_tolower(vstr_t* str);
 
+/*
+* функции для работы с массивом строк
+*/
+
+/*
+* создаёт массив длинной size
+*/
 vstr_array_t* vstr_array_create(long size);
+
+/*
+* удаляет объект массива и освобождает память
+*/
 void vstr_array_free(vstr_array_t* arr);
 
 /*
@@ -145,6 +156,9 @@ void vstr_array_free(vstr_array_t* arr);
 */
 long vstr_array_length(vstr_array_t* arr);
 
+/*
+* очищает массив
+*/
 void vstr_array_clear(vstr_array_t* arr);
 long vstr_array_addv(vstr_array_t* arr, vstr_t* str);
 long vstr_array_adds(vstr_array_t* arr, const char* str);

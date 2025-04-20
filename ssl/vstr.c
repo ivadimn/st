@@ -439,8 +439,13 @@ void vstr_tolower(vstr_t* str)
 */
 static int vstr_array_resize(vstr_array_t *arr);
 
+/*
+* скрытая функция изменения размера массива строк 
+*/
 
 static int vstr_array_resize(vstr_array_t *arr) {
+    // здесь нужно придумать принцип увеличения размера
+    // можно использовать время жизни массива и количество увеличений за это время
     long newc = arr->size * 2;
     vstr_t** array = (vstr_t**) malloc(sizeof(vstr_t*) * newc);
     if(array == NULL)
@@ -454,6 +459,9 @@ static int vstr_array_resize(vstr_array_t *arr) {
     return 1;
 }
 
+/*
+* создаёт массив длинной size
+*/
 vstr_array_t* vstr_array_create(long size) {
     vstr_array_t *arr = (vstr_array_t*) malloc(sizeof(vstr_array_t));
     if (arr == NULL)
@@ -468,6 +476,9 @@ vstr_array_t* vstr_array_create(long size) {
     return arr;
 }
 
+/*
+* удаляет объект массива и освобождает память
+*/
 void vstr_array_free(vstr_array_t* arr) {
     for (long i = 0; i < arr->length; i++) {
         free(arr->array[i]);        
@@ -484,6 +495,10 @@ long vstr_array_length(vstr_array_t* arr)
     return arr->length;
 }
 
+
+/*
+* очищает массив
+*/
 void vstr_array_clear(vstr_array_t* arr) {
     for (long i = 0; i < arr->length; i++) {
         free(arr->array[i]);        
@@ -491,6 +506,9 @@ void vstr_array_clear(vstr_array_t* arr) {
     arr->length = 0;
 }
 
+/*
+* добавляет в массив объект строки vstr_t
+*/
 long vstr_array_addv(vstr_array_t* arr, vstr_t* str) {
     int rc = 0;
     if (arr->length == arr->size) {
@@ -502,6 +520,10 @@ long vstr_array_addv(vstr_array_t* arr, vstr_t* str) {
     return arr->length;
 }
 
+
+/*
+* добавляет в массив сырую строку
+*/
 long vstr_array_adds(vstr_array_t* arr, const char* str) {
     vstr_t* vstr = vstr_dup(str);
     if(vstr == NULL)
