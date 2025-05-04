@@ -28,6 +28,11 @@ int main(int argc, char** argv)
     vstr_array_print(lines, stdout);
     vstr_array_free(lines); */
 
+    vstr_t* str = vstr_dup("1234567890");
+    vstr_t *sub = vstr_substr(str, 2, 5);
+    vstr_print(str, stdout);
+    vstr_print(sub, stdout);
+
     vstr_array_t *arr = vstr_array_create(5);
     
     vstr_array_adds(arr, "1234567890");
