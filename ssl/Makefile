@@ -1,6 +1,6 @@
 
 PROG=test
-FILES=vstr.c file_info.c log.c utils.c
+FILES=vstrex.c
 CC=gcc
 
 CFLAGS=-Wall -Wextra -Wpedantic -Wno-unused-parameter

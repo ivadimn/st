@@ -2,27 +2,11 @@
 #define _VSTR_H_
 
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <stdint.h>
-#include <ctype.h>
 
-#define MAX_PART 8192
-typedef enum state { ONE, TWO } state_t;
-typedef uint16_t symbol;
+typedef struct vstr_t vstr_t;  
 
-
-typedef struct {
-    uint8_t *data;
-    long size;
-    long length;
-} vstr_t;  
-
-typedef struct {
-    vstr_t** array;
-    long size;
-    long length;
-} vstr_array_t;
+typedef struct vstr_array_t vstr_array_t;
 
 
 /*
@@ -136,6 +120,11 @@ void vstr_replace(vstr_t* str, char* what, char c);
 * преобразовывает символы строки в нижней регистр 
 */
 void vstr_tolower(vstr_t* str);
+
+/*
+* преобразовывает символы строки в верхний регистр 
+*/
+void vstr_toupper(vstr_t* str);
 
 /*
 * функции для работы с массивом строк

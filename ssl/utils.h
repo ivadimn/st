@@ -2,7 +2,7 @@
 #define _UTILS_H_
 
 #include <stddef.h>
-#include "vstr.h"
+#include "vstrex.h"
 
 #define MAX_PATH        1024
 #define MAX_PART        8192

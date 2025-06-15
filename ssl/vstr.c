@@ -1,7 +1,29 @@
-#include "vstr.h"
 #include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdint.h>
+#include <ctype.h>
+
+
+#define MAX_PART 8192
+typedef enum state { ONE, TWO } state_t;
+
+typedef struct {
+    uint8_t *data;
+    long size;
+    long length;
+} vstr_t;  
+
+typedef struct {
+    vstr_t** array;
+    long size;
+    long length;
+} vstr_array_t;
 
 const uint8_t hex_val[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF};
+
+long vstr_array_adds(vstr_array_t* arr, const char* str);
 
 static long inhex(uint8_t ch) {
 	const char* hexch = "0123456789ABCDEF";
@@ -425,6 +447,43 @@ void vstr_tolower(vstr_t* str)
             
             
             printf("%x\n", str->data[index+1]);
+            //str->data[index+1] += 0x20;
+            index += 2;
+         }
+    }
+}
+
+/*
+* преобразовывает символы строки в верхний регистр 
+*/
+void vstr_toupper(vstr_t* str)
+{
+    uint8_t ch;
+    long index = 0;
+
+    while (index < str->length)
+    {
+         ch = str->data[index];
+         if (ch < 128)
+         {
+            ch = toupper(ch);
+            str->data[index++] = ch;
+         }
+         else
+         {
+            str->data[index] = 0xD0;    
+            ch = str->data[index+1];
+            if (ch >= 0x80 && ch <= 0x8f)
+            {
+                str->data[index+1] = ch + 0x20;
+                
+            }
+            else if (ch == 0x91) {
+                str->data[index+1] = 0x81;
+            }
+            
+            
+            //printf("%x\n", str->data[index+1]);
             //str->data[index+1] += 0x20;
             index += 2;
          }
