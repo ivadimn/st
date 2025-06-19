@@ -38,5 +38,12 @@ int main(int argc, char** argv)
     long index = vstr_instr(str, "доб");
     printf("index = %ld\n", index);
 
+    vstr_t *substr = vstr_substr(str, 3, 9);
+    vstr_print(substr, stdout);
+    vstr_print_param(substr);
+
+    vstr_t* l = vstr_dup(line2);
+    vstr_split(l, ";", NULL, NULL);
+
     return 0;
 } 

@@ -112,6 +112,14 @@ static void __datatostr(uint8_t* dest, vstr_t* source)
 }
 
 /*
+* создаёт строку из массива внутренних элементов elem
+*/
+static vstr_t* __create_from_elem(elem* data, size_t len)
+{
+    
+}
+
+/*
 * создаёт строку размером size
 */
 vstr_t* vstr_create(long size) {
@@ -330,4 +338,95 @@ long vstr_instr(vstr_t *str, char* s) {
             return (long)index;
     }
     return -1;
+}
+
+/*
+* выделяет и возвращает подстроку из строки по индексам
+* начала и окончания
+*/
+vstr_t* vstr_substr(vstr_t *str, long start, long end) {
+    long len = end - start;
+    vstr_t* substr = NULL;
+
+    if(len < 1)
+        return NULL;
+
+    if (start > (long)str->length - 1 || end > (long)str->length)
+        return NULL;
+           
+    substr = vstr_create(len);
+    for (long i = 0; i < len; i++) {
+        substr->data[i].utf = str->data[start + i].utf;
+        substr->bytes += (substr->data[i].utf < 128) ? 1 : 2;
+        
+    }
+    substr->length = len;
+    return substr;
+}
+
+/*
+* разбивает строки на подстроки по разделителю возвращает массив полстрок
+* подстроки могут быть сгруппированы символами группировки тогда
+* группа включается в массив как подстрока
+*/
+void vstr_split(/*vstr_array_t* arr,*/ vstr_t* str, char* delim, vstr_t* g_open, vstr_t* g_close) {
+    long len = str->length, index = 0;
+    elem* buf = str->data;
+    uint8_t in_group = 0;
+    long g_index = -1;
+    int is_delim = 0;
+    vstr_t* dlms = vstr_dup(delim);
+
+    elem *part = (elem*) malloc(sizeof(elem) * MAX_PART);
+        
+    for (long i = 0; i < len; i++) {
+        
+        switch (in_group)  {
+            case 0:
+                if (vstr_in(dlms, buf[i].utf) >= 0) {
+                    if (!is_delim) {
+                        part[index] = '\0';
+                        //vstr_array_adds(arr, (char*)part);
+                        printf("%s\n", (char*) part);
+                        index = 0;
+                        is_delim = 1;
+                    }
+                }
+                else {
+                    is_delim = 0;
+                }
+
+                if(g_open && (g_index = vstr_in(g_open, buf[i].utf)) >= 0) {
+                    in_group = 1;
+                    is_delim = 1;
+                } 
+                else if (!is_delim)  {
+                    part[index++] = buf[i].utf;
+                }
+                break;
+            case 1:
+                if (buf[i].utf == vstr_at(g_close, g_index)) {
+                    part[index] = 0;
+                    //vstr_array_adds(arr, (char*)part);
+                    printf("%s\n", (char*) part);
+                    index = 0;
+                    in_group = 0;
+                    g_index = -1;
+                }
+                else {
+                    part[index++] = buf[i].utf;
+                }
+                break;
+            default:
+                break;
+        }
+
+    }
+    if (index > 0) {
+        part[index] = 0;
+        //vstr_array_adds(arr, (char*)part);
+        printf("%s\n", (char*) part);    
+    }
+    vstr_free(dlms);
+    free(part);
 }

@@ -103,4 +103,17 @@ uint16_t vstr_at(vstr_t *str, size_t index);
 */
 long vstr_instr(vstr_t *str, char* s);
 
+/*
+* выделяет и возвращает подстроку из строки по индексам
+* начала и окончания
+*/
+vstr_t* vstr_substr(vstr_t *str, long start, long end);
+
+/*
+* разбивает строки на подстроки по разделителю возвращает массив полстрок
+* подстроки могут быть сгруппированы символами группировки тогда
+* группа включается в массив как подстрока
+*/
+void vstr_split(/*vstr_array_t* arr,*/ vstr_t* str, char* delim, vstr_t* g_open, vstr_t* g_close);
+
 #endif
