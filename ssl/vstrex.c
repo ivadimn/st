@@ -40,6 +40,43 @@ static long __find(vstr_t* str, uint16_t ch)
     return -1;
 }
 
+/*
+* передача байт из elem в строку uint8_t
+*/
+static size_t __elemtostr(elem* data, uint8_t* str, size_t index)
+{
+    if (data->utf < 128)
+    {
+        str[index++] = data->asc[0];
+    }
+    else
+    {
+        str[index++] = data->asc[1];
+        str[index++] = data->asc[0];
+    }
+    return index;
+}
+
+/*
+* добавление символа с строку
+*/
+static size_t __chartoelem(elem* data, uint16_t ch)
+{
+    size_t bytes;
+    if (ch < 128)
+    {
+        data->utf = ch;
+        bytes = 1;
+    }
+    else
+    {
+        data->asc[1] = (uint8_t)(ch >> 8);
+        data->asc[0] = (uint8_t)(ch & 0xFF);
+        bytes = 2;
+    }
+    return bytes;
+}
+
 static size_t __str_len(uint8_t* source)
 {
     size_t dest_len = 0;
@@ -112,17 +149,9 @@ static void __datatostr(uint8_t* dest, vstr_t* source)
 }
 
 /*
-* создаёт строку из массива внутренних элементов elem
-*/
-static vstr_t* __create_from_elem(elem* data, size_t len)
-{
-    
-}
-
-/*
 * создаёт строку размером size
 */
-vstr_t* vstr_create(long size) {
+vstr_t* vstr_create(size_t size) {
     vstr_t* str = (vstr_t*) malloc(sizeof(vstr_t));
     if (str == NULL)
         return NULL;
@@ -307,7 +336,6 @@ vstr_t* vstr_append(vstr_t* left, const char* right) {
 * Возвращает индекс вхождения символа в строку или -1
 */
 long vstr_in(vstr_t *str, uint16_t ch) {
-    printf("%x\n", ch);
     return __find(str, ch);
 }
 
@@ -377,7 +405,7 @@ void vstr_split(/*vstr_array_t* arr,*/ vstr_t* str, char* delim, vstr_t* g_open,
     int is_delim = 0;
     vstr_t* dlms = vstr_dup(delim);
 
-    elem *part = (elem*) malloc(sizeof(elem) * MAX_PART);
+    uint8_t *part = (uint8_t*) malloc(sizeof(uint8_t) * MAX_PART);
         
     for (long i = 0; i < len; i++) {
         
@@ -401,7 +429,8 @@ void vstr_split(/*vstr_array_t* arr,*/ vstr_t* str, char* delim, vstr_t* g_open,
                     is_delim = 1;
                 } 
                 else if (!is_delim)  {
-                    part[index++] = buf[i].utf;
+                    index = __elemtostr(&buf[i], part, index);
+                    //part[index++] = buf[i].utf;
                 }
                 break;
             case 1:
@@ -414,7 +443,8 @@ void vstr_split(/*vstr_array_t* arr,*/ vstr_t* str, char* delim, vstr_t* g_open,
                     g_index = -1;
                 }
                 else {
-                    part[index++] = buf[i].utf;
+                    index = __elemtostr(&buf[i], part, index);
+                    //part[index++] = buf[i].utf;
                 }
                 break;
             default:
@@ -429,4 +459,15 @@ void vstr_split(/*vstr_array_t* arr,*/ vstr_t* str, char* delim, vstr_t* g_open,
     }
     vstr_free(dlms);
     free(part);
+}
+
+
+/*
+* добавление символа в строку
+*/
+void vstr_put_ch(vstr_t *str, uint16_t ch) {
+    if(str->length < str->size) {
+        str->bytes += __chartoelem(&(str->data[str->length]), ch);
+        str->length++;
+    }
 }

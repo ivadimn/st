@@ -20,7 +20,7 @@ typedef struct vstr_array_t vstr_array_t;
 * создать строку
 * size - максимальная длина строки
 */
-vstr_t* vstr_create(long size);
+vstr_t* vstr_create(size_t size);
 /*
 * уничтожить строку  
 */
@@ -115,5 +115,10 @@ vstr_t* vstr_substr(vstr_t *str, long start, long end);
 * группа включается в массив как подстрока
 */
 void vstr_split(/*vstr_array_t* arr,*/ vstr_t* str, char* delim, vstr_t* g_open, vstr_t* g_close);
+
+/*
+* добавление символа в строку
+*/
+void vstr_put_ch(vstr_t *str, uint16_t ch);
 
 #endif

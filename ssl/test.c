@@ -38,12 +38,18 @@ int main(int argc, char** argv)
     long index = vstr_instr(str, "доб");
     printf("index = %ld\n", index);
 
-    vstr_t *substr = vstr_substr(str, 3, 9);
+    /*vstr_t *substr = vstr_substr(str, 3, 9);
     vstr_print(substr, stdout);
     vstr_print_param(substr);
 
-    vstr_t* l = vstr_dup(line2);
-    vstr_split(l, ";", NULL, NULL);
+    vstr_t* l = vstr_dup(line);
+    vstr_t *open = vstr_dup("[(");
+    vstr_t *close =vstr_dup("])");
+    vstr_split(l, " ", open, close);*/
+
+    vstr_put_ch(str, (uint16_t)'Я');
+    vstr_print(str, stdout);
+    vstr_print_data(str, stdout);
 
     return 0;
 } 
