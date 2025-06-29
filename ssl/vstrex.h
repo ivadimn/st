@@ -4,6 +4,9 @@
 #include <stdio.h>
 #include <stdint.h>
 
+#define FROM_START  1
+#define FROM_END    0
+
 typedef union elem
 {
     uint8_t asc[sizeof(int)];
@@ -120,5 +123,15 @@ void vstr_split(/*vstr_array_t* arr,*/ vstr_t* str, char* delim, vstr_t* g_open,
 * добавление символа в строку
 */
 void vstr_put_ch(vstr_t *str, uint16_t ch);
+
+/*
+* декодирует url строку в русские буквы
+*/
+void vstr_urldecode(vstr_t *str);
+
+/*
+* отсекает часть строки с начала или с конца
+*/
+void vstr_cut(vstr_t* str, size_t count, int where);
 
 #endif

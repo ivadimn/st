@@ -8,7 +8,6 @@ typedef struct vstr_t vstr_t;
 
 typedef struct vstr_array_t vstr_array_t;
 
-
 /*
 * создать строку
 * size - максимальная длина строки
@@ -120,11 +119,6 @@ void vstr_replace(vstr_t* str, char* what, char c);
 * преобразовывает символы строки в нижней регистр 
 */
 void vstr_tolower(vstr_t* str);
-
-/*
-* преобразовывает символы строки в верхний регистр 
-*/
-void vstr_toupper(vstr_t* str);
 
 /*
 * функции для работы с массивом строк

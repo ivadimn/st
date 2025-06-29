@@ -12,7 +12,7 @@ const char *line = "80.82.70.140 - - [19/Jul/2020:07:31:03 +0000]  \"GET /%D0%BE
 const char *line2 = "Pete Ivanov;250000;начальник Управления";
 const char *url = "%D0%BE%D0%B4%D0%BD%D0%B0%D0%B6%D0%B4%D1%8B";
 const char *buf = "ивановё ivanov";
-const char *buf2 = "abcрсту";
+const char *buf2 = "01234567abcрстуфывапр78917";
 
 int main(int argc, char** argv)
 {
@@ -22,7 +22,7 @@ int main(int argc, char** argv)
     vstr_print_param(str);
     printf("\n");
 
-    vstr_t* strd = vstr_dup(line2);
+   /* vstr_t* strd = vstr_dup(line2);
     vstr_print(strd, stdout);
     vstr_print_param(strd);
     printf("\n");
@@ -32,7 +32,8 @@ int main(int argc, char** argv)
 
     vstr_t* strc = vstr_concat(strd, str);
     vstr_print(strc, stdout);
-    printf("\n");
+    printf("\n");*/
+
     str = vstr_append(str, "добавили слова");
     vstr_print(str, stdout);
     long index = vstr_instr(str, "доб");
@@ -47,9 +48,22 @@ int main(int argc, char** argv)
     vstr_t *close =vstr_dup("])");
     vstr_split(l, " ", open, close);*/
 
-    vstr_put_ch(str, (uint16_t)'Я');
-    vstr_print(str, stdout);
-    vstr_print_data(str, stdout);
+    //vstr_put_ch(str, (uint16_t)'Я');
+    //vstr_print(str, stdout);
+    //vstr_print_data(str, stdout);
+
+    vstr_t *ur = vstr_dup(url);
+    vstr_urldecode(ur);
+    vstr_print(ur, stdout);
+    printf("--------------------------------------\n\n");
+    vstr_t *fcut = vstr_dup(buf2);
+    vstr_print(fcut, stdout); 
+    printf("--------------------------------------\n\n");
+    vstr_cut(fcut, 5, FROM_END);
+    vstr_print(fcut, stdout); 
+    printf("--------------------------------------\n\n");
+    vstr_cut(fcut, 7, FROM_START);
+    vstr_print(fcut, stdout);
 
     return 0;
 } 

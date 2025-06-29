@@ -8,6 +8,7 @@
 
 #define MAX_PART 8192
 typedef enum state { ONE, TWO } state_t;
+const uint8_t PERCENT = '%';
 
 typedef union elem
 {
@@ -30,6 +31,15 @@ typedef struct {
 } vstr_array_t;
 
 const uint8_t hex_val[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF};
+
+static long __inhex(uint8_t ch) {
+	const char* hexch = "0123456789ABCDEF";
+	for (long i = 0; i < 16; i++)  {
+        if ((uint8_t) hexch[i] == ch)
+            return i;
+    }
+    return -1;
+}
 
 static long __find(vstr_t* str, uint16_t ch)
 {
@@ -98,6 +108,9 @@ static size_t __str_len(uint8_t* source)
     return dest_len;
 }
 
+/*
+* байты из буфера кладёт в строку
+*/
 static int __strtodata(vstr_t* dest, uint8_t* source, size_t len)
 {
     size_t i = 0, index = dest->length;
@@ -124,7 +137,9 @@ static int __strtodata(vstr_t* dest, uint8_t* source, size_t len)
     return 0;
 }
 
-
+/*
+* достаёт из строки простые байты и кладёт их в буфер
+*/
 static void __datatostr(uint8_t* dest, vstr_t* source)
 {
     size_t index = 0;
@@ -146,6 +161,31 @@ static void __datatostr(uint8_t* dest, vstr_t* source)
         }
     }
     dest[index] = 0;
+}
+
+/*
+* обнуляет строку
+*/
+static void __reset(vstr_t* str)
+{
+    str->bytes = 0;
+    str->length = 0;
+    for (size_t i = 0; i < str->size; i++)
+    {
+        str->data[i].utf = 0;
+    }
+}
+
+/*
+* пересчитывает байты в строке
+*/
+static void __recountbytes(vstr_t* str)
+{
+    str->bytes = 0;
+    for (size_t i = 0; i < str->length; i++)
+    {
+        str->bytes += (str->data[i].utf < 128) ? 1 : 2;
+    }
 }
 
 /*
@@ -203,6 +243,7 @@ void vstr_print(vstr_t* str, FILE* f)
     __datatostr(tmp, str);
     fwrite(tmp, sizeof(uint8_t), strlen((const char*) tmp), f);
     fwrite("\n", 1, 1, f);
+    fflush(f);
     free(tmp);
 }
 
@@ -231,13 +272,16 @@ void vstr_assign(vstr_t *str, const char* value)
 }
 
 /*
-* копирование строки
+* копирование строки или части строки
 */
-int vstr_copy(vstr_t* dest, vstr_t* source)
+int vstr_copy(vstr_t* dest, vstr_t* source, size_t start, size_t count)
 {
-    if (dest->size < source->length)
+    if ((dest->size < source->length) || (start + count > source->length))
         return -1;
-    memcpy(dest->data, source->data, sizeof(elem) * source->length);
+    
+    memcpy(dest->data, &source->data[start], sizeof(elem) * count);
+    dest->length = count;
+    __recountbytes(dest);
     return 0;    
 }
 
@@ -323,7 +367,7 @@ vstr_t* vstr_append(vstr_t* left, const char* right) {
         str = vstr_create(len_l + len_r);
         if (str == NULL)
             return NULL;
-        vstr_copy(str, left);
+        vstr_copy(str, left, 0, left->length);
         vstr_free(left);
     } else {
         str = left;
@@ -354,15 +398,12 @@ uint16_t vstr_at(vstr_t *str, size_t index) {
 */
 long vstr_instr(vstr_t *str, char* s) {
 
-    uint8_t* tmp = malloc(sizeof(uint8_t) * (str->bytes + 1));
-    size_t lens = __str_len((uint8_t*)s);
-    if (str->length < lens)
+    vstr_t* tmp = vstr_dup(s);
+    if (str->length < tmp->length)
         return -1;
     
-    __datatostr(tmp, str);
-    size_t len = strlen(s);
-    for (size_t index = 0; index <= str->length - len; index++) {
-        if (strncmp((const char*) &tmp[index], s, (size_t) len) == 0)
+    for (size_t index = 0; index <= str->length - tmp->length; index++) {
+        if (memcmp(&str->data[index], tmp->data, tmp->length) == 0)
             return (long)index;
     }
     return -1;
@@ -471,3 +512,74 @@ void vstr_put_ch(vstr_t *str, uint16_t ch) {
         str->length++;
     }
 }
+
+/*
+* декодирует url строку в русские буквы
+*/
+void vstr_urldecode(vstr_t *str) {
+    uint8_t buf[4096];
+    uint8_t *tmp;
+	uint8_t ch;
+	state_t state = ONE;
+	long index, buf_index = 0;
+    int decode = 0;
+    size_t len = 0;
+    tmp = (uint8_t*)malloc(sizeof(uint8_t) * str->size);
+
+    __datatostr(tmp, str);
+    len = strlen((const char*)tmp);
+
+    for (size_t i = 0; i < len; i++) {
+
+		if (tmp[i] == PERCENT) {
+            decode = 1;
+			continue;
+        }
+		index = __inhex(tmp[i]);
+		if (index >= 0 && decode) {
+			switch (state) {
+				case ONE:
+					ch = hex_val[index];
+					ch <<= 4;
+					state = TWO;
+					break;
+				case TWO:
+					ch |= hex_val[index];
+					state = ONE;
+					buf[buf_index++] = ch;
+                    decode = 0;
+					break;
+				default:
+					break;
+			}
+		}
+		else {
+			buf[buf_index++] = tmp[i];
+		}
+	}
+	buf[buf_index++] = '\0';
+    __reset(str);
+    vstr_assign(str, (const char*)buf);
+    free(tmp);
+}
+
+/*
+* отсекает часть строки с начала или с конца
+*/
+void vstr_cut(vstr_t* str, size_t count, int where) {
+    size_t index;
+    vstr_t* tmp = NULL;
+    if (count >= str->length)
+        return;
+    
+    tmp = vstr_create(str->size);
+    index = (where == 0) ? 0 : count;
+    
+    vstr_copy(tmp, str, index, str->length - count);
+    
+    __reset(str);
+    vstr_copy(str, tmp, 0, tmp->length);
+    vstr_free(tmp);
+    
+}
+
