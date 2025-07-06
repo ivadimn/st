@@ -1,10 +1,10 @@
 
-PROG=test
-FILES=vstrex.c
+PROG=main
+FILES=db.c log.c
 CC=gcc
 
-CFLAGS=-Wall -Wextra -Wpedantic -Wno-unused-parameter
-LIBS=`pkg-config --libs libssl libcrypto`
+CFLAGS=-Wall -Wextra -Wpedantic -Wno-unused-parameter `pkg-config --cflags sqlite3` 
+LIBS=`pkg-config --libs sqlite3`
 
 $(PROG): $(PROG).c 
 	$(CC) $(CFLAGS) $(PROG).c $(FILES) -o $(PROG) $(LIBS)
