@@ -134,4 +134,10 @@ void vstr_urldecode(vstr_t *str);
 */
 void vstr_cut(vstr_t* str, size_t count, int where);
 
+/*
+* заменяет символы в строки на на указанный символ
+* если символ 0 то просто удаляет символы из строки
+*/
+void vstr_replace(vstr_t* str, char* what, char c);
+
 #endif

@@ -8,7 +8,7 @@ entity_t* entity_new()
     entity_t* e = (entity_t*) malloc(sizeof(entity_t));
     if (e == NULL)
     {
-        crit("Ошибка выделения памяти под объетк <entity_t>\n");
+        crit("Ошибка выделения памяти под объект <entity_t>\n");
     }
     return e;
     
@@ -25,6 +25,11 @@ void entity_dtor(entity_t *e)
 size_t entity_get_id(entity_t* e)
 {
     return e->id;
+}
+
+void entity_free(entity_t* e)
+{
+    free(e);
 }
 
 

@@ -580,6 +580,28 @@ void vstr_cut(vstr_t* str, size_t count, int where) {
     __reset(str);
     vstr_copy(str, tmp, 0, tmp->length);
     vstr_free(tmp);
-    
+}
+
+/*
+* заменяет символы в строки на на указанный символ
+* если символ 0 то просто удаляет символы из строки
+*/
+void vstr_replace(vstr_t* str, char* what, char c)
+{
+    size_t index = 0;
+    char* tmp = (char*) malloc(sizeof(char) * str->length);
+    vstr_t* w = vstr_dup(what);
+    for (long i = 0; i < str->length; i++)
+    {
+        if (vstr_in(w, str->data[i]) >= 0)
+        {
+            if (c > 0)
+                tmp[index++] = c;
+        }
+        else
+            tmp[index++] = str->data[i];
+    }
+    tmp[index] = '\0';
+    vstr_assign(str, tmp);
 }
 

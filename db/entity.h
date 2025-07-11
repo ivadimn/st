@@ -11,4 +11,7 @@ void entity_dtor(entity_t *e);
 
 size_t entity_get_id(entity_t* e);
 
+void entity_free(entity_t* e);
+
+
 #endif
