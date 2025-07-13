@@ -32,6 +32,10 @@ typedef struct {
 
 const uint8_t hex_val[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF};
 
+vstr_t* vstr_create(size_t size);
+void vstr_free(vstr_t* str);
+
+
 static long __inhex(uint8_t ch) {
 	const char* hexch = "0123456789ABCDEF";
 	for (long i = 0; i < 16; i++)  {
@@ -189,6 +193,20 @@ static void __recountbytes(vstr_t* str)
 }
 
 /*
+* изменяет размер строки
+*/
+static void __resize(vstr_t *str, size_t new_size)
+{
+    elem* new_data = (new_size == 0) ? 
+        (elem*)malloc(sizeof(elem) * (str->size * 2)) : (elem*)malloc(sizeof(elem) * new_size);
+
+    memcpy(new_data, str->data, sizeof(elem) * str->length);
+    free(str->data);
+    str->data = new_data; 
+    
+}
+
+/*
 * создаёт строку размером size
 */
 vstr_t* vstr_create(size_t size) {
@@ -277,7 +295,7 @@ void vstr_assign(vstr_t *str, const char* value)
 int vstr_copy(vstr_t* dest, vstr_t* source, size_t start, size_t count)
 {
     if ((dest->size < source->length) || (start + count > source->length))
-        return -1;
+        __resize(dest, source->length * 2);
     
     memcpy(dest->data, &source->data[start], sizeof(elem) * count);
     dest->length = count;
@@ -507,10 +525,13 @@ void vstr_split(/*vstr_array_t* arr,*/ vstr_t* str, char* delim, vstr_t* g_open,
 * добавление символа в строку
 */
 void vstr_put_ch(vstr_t *str, uint16_t ch) {
-    if(str->length < str->size) {
-        str->bytes += __chartoelem(&(str->data[str->length]), ch);
-        str->length++;
-    }
+
+    if (str->length >= str->size)
+        __resize(str, 0);
+    
+    str->bytes += __chartoelem(&(str->data[str->length]), ch);
+    str->length++;
+    
 }
 
 /*
@@ -586,22 +607,101 @@ void vstr_cut(vstr_t* str, size_t count, int where) {
 * заменяет символы в строки на на указанный символ
 * если символ 0 то просто удаляет символы из строки
 */
-void vstr_replace(vstr_t* str, char* what, char c)
+void vstr_replace(vstr_t* str, char* what, uint16_t c)
 {
     size_t index = 0;
-    char* tmp = (char*) malloc(sizeof(char) * str->length);
+    vstr_t* tmp = vstr_create(str->length);
     vstr_t* w = vstr_dup(what);
-    for (long i = 0; i < str->length; i++)
+
+    for (size_t i = 0; i < str->length; i++)
     {
-        if (vstr_in(w, str->data[i]) >= 0)
+        if (vstr_in(w, str->data[i].utf) >= 0)
         {
             if (c > 0)
-                tmp[index++] = c;
+                vstr_put_ch(tmp, c);
         }
         else
-            tmp[index++] = str->data[i];
+            vstr_put_ch(tmp, str->data[i].utf);
     }
-    tmp[index] = '\0';
-    vstr_assign(str, tmp);
+    vstr_copy(str, tmp, 0, tmp->length);
+    vstr_free(tmp);
+    vstr_free(w);
 }
 
+/*
+* переводит строку в нижней регистр
+*/
+void vstr_tolower(vstr_t* str)
+{
+    uint16_t ch;
+    
+    for (size_t i = 0; i < str->length; i++)
+    {
+        ch = str->data[i].utf;
+        if (ch < 128)
+        {
+            ch = tolower(ch);
+            str->data[i].utf = ch;
+        }
+        else
+        {
+            ch = str->data[i].utf;
+            if (ch >= 0xd090 && ch <= 0xd09f)
+            {
+                str->data[i].utf = ch + 0x20;    
+            }
+            else if (ch >= 0xd0a0 && ch <= 0xd0af)
+            {
+                str->data[i].utf = ch + 0xe0;    
+            }
+            
+            else if (ch == 0xd081) {
+                str->data[i].utf = ch + 0x110;    
+            }
+        }
+    }
+}
+
+/*
+* переводит строку в верхний регистр
+*/
+void vstr_toupper(vstr_t* str)
+{
+    uint16_t ch;
+    
+    for (size_t i = 0; i < str->length; i++)
+    {
+        ch = str->data[i].utf;
+        if (ch < 128)
+        {
+            ch = toupper(ch);
+            str->data[i].utf = ch;
+        }
+        else
+        {
+            ch = str->data[i].utf;
+            if (ch >= 0xd0b0 && ch <= 0xd0bf)
+            {
+                str->data[i].utf = ch - 0x20;    
+            }
+            else if (ch >= 0xd180 && ch <= 0xd18f)
+            {
+                str->data[i].utf = ch - 0xe0;    
+            }
+            
+            else if (ch == 0xd191) {
+                str->data[i].utf = ch - 0x110;    
+            }
+        }
+    }
+}
+
+
+void print_delta(vstr_t *s1, vstr_t *s2)
+{
+    for (size_t i = 0; i < s1->length; i++)
+    {
+        printf("%x - %x = %x\n", s2->data[i].utf, s1->data[i].utf, s2->data[i].utf - s1->data[i].utf);
+    }
+    
+}

@@ -138,6 +138,18 @@ void vstr_cut(vstr_t* str, size_t count, int where);
 * заменяет символы в строки на на указанный символ
 * если символ 0 то просто удаляет символы из строки
 */
-void vstr_replace(vstr_t* str, char* what, char c);
+void vstr_replace(vstr_t* str, char* what, uint16_t c);
+
+/*
+* переводит строку в нижней регистр
+*/
+void vstr_tolower(vstr_t* str);
+
+/*
+* переводит строку в верхний регистр
+*/
+void vstr_toupper(vstr_t* str);
+
+void print_delta(vstr_t *s1, vstr_t *s2);
 
 #endif
