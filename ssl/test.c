@@ -28,7 +28,17 @@ int main(int argc, char** argv)
     vstr_toupper(s2);
     vstr_print(s2, stdout);
 
-    vstr_free(s1);
-    vstr_free(s2);
+    vstr_t* s3 = vstr_dup(line2);
+
+    vstr_array_t *arr = vstr_array_create(5);
+    vstr_array_addv(arr, s1);
+    vstr_array_addv(arr, s2);
+    vstr_array_addv(arr, s3);
+
+    vstr_array_print(arr, stdout);
+
+    vstr_array_free(arr);
+    //vstr_free(s1);
+    //vstr_free(s2);
     return 0;
 } 

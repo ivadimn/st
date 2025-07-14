@@ -150,6 +150,54 @@ void vstr_tolower(vstr_t* str);
 */
 void vstr_toupper(vstr_t* str);
 
-void print_delta(vstr_t *s1, vstr_t *s2);
+
+/*
+* функции для работы с массивом строк
+*/
+
+/*
+* создаёт массив длинной size
+*/
+vstr_array_t* vstr_array_create(size_t size);
+
+/*
+* удаляет объект массива и освобождает память
+*/
+void vstr_array_free(vstr_array_t* arr);
+
+/*
+* возвращает длину массива
+*/
+size_t vstr_array_length(vstr_array_t* arr);
+
+/*
+* очищает массив
+*/
+void vstr_array_clear(vstr_array_t* arr);
+
+/*
+* добавляет в массив объект строки vstr_t
+*/
+size_t vstr_array_addv(vstr_array_t* arr, vstr_t* str);
+
+/*
+* добавляет в массив сырую строку
+*/
+size_t vstr_array_adds(vstr_array_t* arr, const char* str);
+
+/*
+* возвращает строку по индексу
+*/
+vstr_t* vstr_array_get(vstr_array_t* arr, long index);
+
+/*
+* Печатает массив строк в указанный файловый объект
+*/
+void vstr_array_print(vstr_array_t* arr, FILE* f);
+
+/*
+* соединяет массив строк в одну строку с указанным разделителем
+*/
+vstr_t* vstr_array_join(vstr_array_t* arr, char* delim);
 
 #endif

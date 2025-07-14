@@ -459,12 +459,10 @@ void vstr_tolower(vstr_t* str)
 *
 *****************************************************************************
 */
-static int vstr_array_resize(vstr_array_t *arr);
 
 /*
 * скрытая функция изменения размера массива строк 
 */
-
 static int vstr_array_resize(vstr_array_t *arr) {
     // здесь нужно придумать принцип увеличения размера
     // можно использовать время жизни массива и количество увеличений за это время
@@ -559,6 +557,7 @@ vstr_t* vstr_array_get(vstr_array_t* arr, long index) {
         return NULL;
     return arr->array[index];    
 }
+
 void vstr_array_print(vstr_array_t* arr, FILE* f) {
     for (long i = 0; i < arr->length; i++) {
         vstr_print(arr->array[i], f);

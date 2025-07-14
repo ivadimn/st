@@ -696,12 +696,148 @@ void vstr_toupper(vstr_t* str)
     }
 }
 
+/*
+****************************************************************************
+* vstr_array functions
+*
+*****************************************************************************
+*/
 
-void print_delta(vstr_t *s1, vstr_t *s2)
-{
-    for (size_t i = 0; i < s1->length; i++)
-    {
-        printf("%x - %x = %x\n", s2->data[i].utf, s1->data[i].utf, s2->data[i].utf - s1->data[i].utf);
+/*
+* скрытая функция изменения размера массива строк 
+*/
+static int vstr_array_resize(vstr_array_t *arr) {
+    // здесь нужно придумать принцип увеличения размера
+    // можно использовать время жизни массива и количество увеличений за это время
+    long newc = arr->size * 2;
+    vstr_t** array = (vstr_t**) malloc(sizeof(vstr_t*) * newc);
+    if(array == NULL)
+        return -1;
+    for (size_t i = 0; i < arr->length; i++)  {
+        array[i] = arr->array[i];
     }
+    free(arr->array);
+    arr->size = newc;
+    arr->array = array;
+    return 1;
+}
+
+/*
+* создаёт массив длинной size
+*/
+vstr_array_t* vstr_array_create(long size) {
+    vstr_array_t *arr = (vstr_array_t*) malloc(sizeof(vstr_array_t));
+    if (arr == NULL)
+        return NULL;
+    arr->array = (vstr_t**) malloc(sizeof(vstr_t*) * size);
+    if (arr->array == NULL) {
+        free(arr);
+        return NULL;
+    }
+    arr->size = size;
+    arr->length = 0;
+    return arr;
+}
+
+/*
+* удаляет объект массива и освобождает память
+*/
+void vstr_array_free(vstr_array_t* arr) {
+    for (size_t i = 0; i < arr->length; i++) {
+        vstr_free(arr->array[i]);        
+    }
+    free(arr->array);
+    free(arr);
+}
+
+
+/*
+* возвращает длину массива
+*/
+size_t vstr_array_length(vstr_array_t* arr)
+{
+    return arr->length;
+}
+
+/*
+* очищает массив
+*/
+void vstr_array_clear(vstr_array_t* arr) {
+    for (size_t i = 0; i < arr->length; i++) {
+        free(arr->array[i]);        
+    }
+    arr->length = 0;
+}
+
+/*
+* добавляет в массив объект строки vstr_t
+*/
+size_t vstr_array_addv(vstr_array_t* arr, vstr_t* str) {
+    int rc = 0;
+    if (arr->length == arr->size) {
+        rc = vstr_array_resize(arr);
+        if (rc < 0)
+            return rc;
+    }
+    arr->array[arr->length++] = str;
+    return arr->length;
+}
+
+/*
+* добавляет в массив сырую строку
+*/
+size_t vstr_array_adds(vstr_array_t* arr, const char* str) {
+    vstr_t* vstr = vstr_dup(str);
+    if(vstr == NULL)
+        return -1;
+
+    return vstr_array_addv(arr, vstr);    
+}
+
+/*
+* возвращает строку по индексу
+*/
+vstr_t* vstr_array_get(vstr_array_t* arr, long index) {
+    if (index >= arr->length)
+        return NULL;
+    return arr->array[index];    
+}
+
+/*
+* Печатает массив строк в указанный файловый объект
+*/
+void vstr_array_print(vstr_array_t* arr, FILE* f) {
+    for (size_t i = 0; i < arr->length; i++) {
+        vstr_print(arr->array[i], f);
+    }
+}
+
+/*
+* соединяет массив строк в одну строку с указанным разделителем
+*/
+vstr_t* vstr_array_join(vstr_array_t* arr, char* delim) {
     
+    vstr_t *str_delim = vstr_dup(delim);
+    size_t len_str = 0;
+
+    vstr_t* str = NULL;
+    for (size_t i = 0; i < arr->length; i++) {
+        len_str += arr->array[i]->length;
+    }
+    len_str += (str_delim->length * (arr->length - 1));
+    
+    str = vstr_create(len_str);
+    len_str = 0;
+    for (size_t i = 0; i < arr->length - 1; i++) {
+        memcpy(str->data + len_str, arr->array[i]->data, sizeof(elem) * arr->array[i]->length);
+        len_str +=  arr->array[i]->length;
+        memcpy(str->data + len_str, str_delim->data, sizeof(elem) * str_delim->length);
+        len_str +=  str_delim->length;
+    }
+    memcpy(str->data + len_str, arr->array[arr->length - 1]->data, 
+            sizeof(elem) * arr->array[arr->length - 1]->length);
+    len_str += arr->array[arr->length - 1]->length;
+    str->length = len_str;
+    __recountbytes(str);
+    return str;
 }
