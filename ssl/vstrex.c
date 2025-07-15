@@ -797,7 +797,7 @@ size_t vstr_array_adds(vstr_array_t* arr, const char* str) {
 /*
 * возвращает строку по индексу
 */
-vstr_t* vstr_array_get(vstr_array_t* arr, long index) {
+vstr_t* vstr_array_get(vstr_array_t* arr, size_t index) {
     if (index >= arr->length)
         return NULL;
     return arr->array[index];    

@@ -34,9 +34,12 @@ int main(int argc, char** argv)
     vstr_array_addv(arr, s1);
     vstr_array_addv(arr, s2);
     vstr_array_addv(arr, s3);
-
+    printf("\n-----------------------------------------------\n");
     vstr_array_print(arr, stdout);
+    vstr_t* sj = vstr_array_join(arr, "   ");
+    vstr_print(sj, stdout);
 
+    vstr_free(sj);
     vstr_array_free(arr);
     //vstr_free(s1);
     //vstr_free(s2);
