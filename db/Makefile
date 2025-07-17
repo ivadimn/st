@@ -1,6 +1,6 @@
 
 PROG=main
-FILES=db.c log.c entity.c pd.c
+FILES=db.c log.c entity.c pd.c vstrex.c
 CC=gcc
 
 CFLAGS=-Wall -Wextra -Wpedantic -Wno-unused-parameter `pkg-config --cflags sqlite3` 

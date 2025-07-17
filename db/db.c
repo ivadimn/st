@@ -21,13 +21,18 @@ typedef struct {
 static char sql[SQL_LEN];
 static char error_message[ERR_MSG_LEN];
 
+sqlite3* get_db(conn_t* conn)
+{
+    return conn->db;
+}
+
 
 conn_t* create_conn(const char* db_name)
 {
     conn_t* conn = (conn_t*)malloc(sizeof(conn_t));
     if (conn == NULL)
         crit("Ошибка выделения памяти\n");
-
+    strncpy(conn->dbname, db_name, INFO_LEN - 1);
     return conn;    
 }
 
