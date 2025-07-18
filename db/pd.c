@@ -1,9 +1,12 @@
 #include <string.h>
 #include <stdlib.h>
+#include <sqlite3.h>
 
 #include "entityp.h"
 #include "entity.h"
 #include "log.h"
+
+typedef void (*result_list_t) (sqlite3_stmt *stmt, void* data);
 
 typedef struct 
 {
