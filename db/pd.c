@@ -6,7 +6,9 @@
 #include "entity.h"
 #include "log.h"
 
-typedef void (*result_list_t) (sqlite3_stmt *stmt, void* data);
+const char *sql = "Select id, name FROM pd;";
+
+
 
 typedef struct 
 {

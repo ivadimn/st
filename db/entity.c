@@ -18,6 +18,7 @@ void entity_ctor(entity_t *e, size_t id, char *name)
 {
     e->name = vstr_dup(name);
     e->id = id;
+    e->result_list = NULL;
 }
 void entity_dtor(entity_t *e)
 {
