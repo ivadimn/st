@@ -8,8 +8,6 @@
 
 const char *sql = "Select id, name FROM pd;";
 
-
-
 typedef struct 
 {
     entity_t entity;

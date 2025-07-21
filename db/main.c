@@ -5,7 +5,6 @@
 #include "vstrex.h"
 
 
-const char *sql = "Select id, name FROM pd;";
 char *err_msg = NULL;
 
 typedef int (*result_handel)(void *data, int argc, char **argv, char **col_name);
