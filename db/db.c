@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <sqlite3.h>
 
+#include "db.h"
 #include "log.h"
 
 #define SQL_LEN 4096
@@ -59,4 +60,27 @@ char* get_err_msg() {
     return error_message;
 }
 
+
+long select(conn_t* conn, const char* command, 
+            result_list_t func, void* data, param_list_t* params)
+{
+    long result;
+    sqlite3_stmt* stmt; 
+
+    if(sqlite3_prepare_v2(conn->db, sql, -1, &stmt, NULL) != SQLITE_OK) {
+        printf("Ошибка подготовки SQL-запроса: %s\n", sqlite3_errmsg(conn->db));
+        sqlite3_finalize(stmt);
+        return -1;
+    }
+
+    result = func(stmt, data, params);
+        
+    if(result != SQLITE_DONE) {
+        printf("Ошибка выполнения SQL-запроса: %s\n", sqlite3_errmsg(db));
+        sqlite3_finalize(stmt);
+        return -1;
+    }
+    sqlite3_finalize(stmt);
+    return 0;        
+}
 
