@@ -13,6 +13,9 @@ void entity_dtor(entity_t *e);
 size_t entity_get_id(entity_t* e);
 vstr_t* entity_get_name(entity_t* e);
 
+void entity_set_id(entity_t* e, size_t id);
+void entity_set_name(entity_t* e, vstr_t* str);
+
 void entity_free(entity_t* e);
 
 

@@ -13,7 +13,7 @@ void open_db(conn_t* conn);
 void close_db(conn_t* conn);
 char* get_err_msg();
 
-long select(conn_t* conn, const char* command, result_list_t func, void* data, param_list_t* params);
+long selectv(conn_t* conn, const char* command, result_list_t func, void* data, param_list_t* params);
 
 sqlite3* get_db(conn_t* conn);
 

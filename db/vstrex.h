@@ -44,7 +44,7 @@ void vstr_assign(vstr_t *str, const char* value);
 /*
 * копирование строки
 */
-int vstr_copy(vstr_t* dest, vstr_t* source);
+int vstr_copy(vstr_t* dest, vstr_t* source, size_t start, size_t count);
 
 /*
 * создаёт объектс vstr из массива символов 

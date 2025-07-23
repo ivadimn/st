@@ -13,7 +13,7 @@
 
 #define INVALID_PARAM -1
 
-typedef struct {
+typedef struct conn_t {
     sqlite3 *db;
     char dbname[INFO_LEN];
 } conn_t;
@@ -61,7 +61,7 @@ char* get_err_msg() {
 }
 
 
-long select(conn_t* conn, const char* command, 
+long selectv(conn_t* conn, const char* command, 
             result_list_t func, void* data, param_list_t* params)
 {
     long result;
@@ -76,7 +76,7 @@ long select(conn_t* conn, const char* command,
     result = func(stmt, data, params);
         
     if(result != SQLITE_DONE) {
-        printf("Ошибка выполнения SQL-запроса: %s\n", sqlite3_errmsg(db));
+        printf("Ошибка выполнения SQL-запроса: %s\n", sqlite3_errmsg(conn->db));
         sqlite3_finalize(stmt);
         return -1;
     }
