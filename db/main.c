@@ -8,8 +8,9 @@
 
 char *err_msg = NULL;
 
-size_t ids[] = {1, 2, 3, 4, 5, 6};
-char* names[] = {"111", "222", "333", "444", "555", "666"};
+size_t ids[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
+char* names[] = {"111", "222", "333", "444", "555", "666", "777", "888", "999", 
+    "10 10 10", "11 11 11 ", "12 12 12"};
 
 
 int main(int argc, char** argv)
@@ -24,23 +25,36 @@ int main(int argc, char** argv)
 
 
     array_t* arr = new_array(A_TYPE_POINTER, 6, sizeof(pd_t*));
-    pd_t* pd = NULL;
+    pd_t **pd = NULL;
+    pd_t *pdf = NULL;
+    pd = (pd_t**)malloc(sizeof(pd_t*) * 12);
+    for (size_t i = 0; i < 12; i++)
+    {
+        pd[i] = pd_new();
+        pd_ctor(pd[i], ids[i],  names[i]);
+        put(arr, i, &(pd[i]));
+    }
     for (size_t i = 0; i < 6; i++)
     {
-        pd = pd_new();
-        pd_ctor(pd, ids[i],  names[i]);
-        put(arr, i, &pd);
+        put(arr, i, &(pd[i]));
     }
+
+    putm(arr, 6, &(pd[6]), 6);
     
+    for (size_t i = 0; i < 12; i++)
+    {
+        get(arr, i, &pdf);
+        printf("id = %ld\n", entity_get_id((entity_t*)pdf));
+        vstr_t*  name = entity_get_name((entity_t*)pdf);
+        vstr_print(name, stdout);
+    }
+
     for (size_t i = 0; i < 6; i++)
     {
-        get(arr, i, &pd);
-        printf("id = %ld\n", entity_get_id((entity_t*)pd));
-        vstr_t*  name = entity_get_name((entity_t*)pd);
-        vstr_print(name, stdout);
-        pd_dtor(pd);
-        pd_free(pd);
+        pd_free(pd[i]);
     }
+    free(pd);
+
     del_array(arr);
     
     return 0;

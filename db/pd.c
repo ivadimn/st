@@ -1,6 +1,6 @@
 #include <string.h>
 #include <stdlib.h>
-#include <sqlite3.h>
+#include "db.h"
 
 #include "entityp.h"
 #include "entity.h"
@@ -12,6 +12,8 @@ typedef struct
 {
     entity_t entity;
 } pd_t;
+
+
 
 pd_t* pd_new()
 {

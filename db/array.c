@@ -27,27 +27,14 @@ static void _valid(array_t *arr) {
 */
 static void _revalid(array_t *arr, size_t index) {
 
-    printf("Индексы до перераспределения\n");
-    for (size_t i = 0; i < arr->size; i++) {
-        printf("%d, ", arr->valids[i]);
-    }
-    printf("\n");
-
     size_t old_size = arr->size;
     size_t new_size = arr->size+index;
 
     REALLOC(arr->valids, old_size, new_size, int);
 
-    printf("Индексы после перераспределения\n");
-    for (size_t i = 0; i < arr->size + index; i++) {
-        printf("%d, ", arr->valids[i]);
-    }
-    printf("\n");
-
     for (size_t i = arr->size; i < arr->size + index; i++) {
         arr->valids[i] = -1;
     }
-    
 }
 
 /*

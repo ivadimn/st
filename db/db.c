@@ -73,6 +73,7 @@ long selectv(conn_t* conn, const char* command,
         return -1;
     }
 
+    
     result = func(stmt, data, params);
         
     if(result != SQLITE_DONE) {
