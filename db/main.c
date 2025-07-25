@@ -1,4 +1,7 @@
 #include <stdio.h>
+#include <wchar.h>
+#include <wctype.h>
+#include <locale.h>
 #include "db.h"
 #include "pd.h"
 #include "entity.h"
@@ -56,6 +59,8 @@ int main(int argc, char** argv)
     free(pd);
 
     del_array(arr);
+
+
     
     return 0;
 }
