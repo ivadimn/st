@@ -1,5 +1,6 @@
 {
     "files.associations": {
-        "wctype.h": "c"
+        "wctype.h": "c",
+        "stdlib.h": "c"
     }
 }

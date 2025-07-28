@@ -4,7 +4,13 @@
 #include <stddef.h>
 #include "vstrex.h"
 
-typedef struct entity_t entity_t;
+
+typedef struct entity_t
+{
+     size_t id;
+     vstr_t* name;
+     
+} entity_t;
 
 entity_t* entity_new();
 void entity_ctor(entity_t *e, size_t id, char* name);

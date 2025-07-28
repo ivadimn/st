@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include "log.h"
-#include "entityp.h"
+#include "entity.h"
 #include "vstrex.h"
 
 

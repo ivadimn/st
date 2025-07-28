@@ -19,7 +19,7 @@ typedef struct conn_t {
 } conn_t;
 
 
-static char sql[SQL_LEN];
+//static char sql[SQL_LEN];
 static char error_message[ERR_MSG_LEN];
 
 sqlite3* get_db(conn_t* conn)
@@ -61,23 +61,24 @@ char* get_err_msg() {
 }
 
 
-long selectv(conn_t* conn, const char* command, 
+int selectv(conn_t* conn, const char* command, 
             result_list_t func, void* data, param_list_t* params)
 {
-    long result;
+    int result;
     sqlite3_stmt* stmt; 
 
-    if(sqlite3_prepare_v2(conn->db, sql, -1, &stmt, NULL) != SQLITE_OK) {
-        printf("Ошибка подготовки SQL-запроса: %s\n", sqlite3_errmsg(conn->db));
+    result = sqlite3_prepare_v2(conn->db, command, -1, &stmt, NULL);
+
+    if(result != SQLITE_OK) {
+        err("Ошибка подготовки SQL-запроса: %s\n", sqlite3_errmsg(conn->db));
         sqlite3_finalize(stmt);
         return -1;
     }
 
-    
     result = func(stmt, data, params);
         
     if(result != SQLITE_DONE) {
-        printf("Ошибка выполнения SQL-запроса: %s\n", sqlite3_errmsg(conn->db));
+        err("Ошибка выполнения SQL-запроса: %s\n", sqlite3_errmsg(conn->db));
         sqlite3_finalize(stmt);
         return -1;
     }
@@ -85,3 +86,29 @@ long selectv(conn_t* conn, const char* command,
     return 0;        
 }
 
+
+int countv(conn_t* conn, const char* command, size_t* count)
+{
+    int result;
+    sqlite3_stmt* stmt; 
+    
+    result = sqlite3_prepare_v2(conn->db, command, -1, &stmt, NULL);
+
+    if(result != SQLITE_OK) {
+        err("Ошибка подготовки SQL-запроса: %s\n", sqlite3_errmsg(conn->db));
+        sqlite3_finalize(stmt);
+        return -1;
+    }
+
+    result = sqlite3_step(stmt);
+
+        
+    if(result != SQLITE_ROW) {
+        err("Ошибка выполнения SQL-запроса: %s\n", sqlite3_errmsg(conn->db));
+        sqlite3_finalize(stmt);
+        return -1;
+    }
+    *count = sqlite3_column_int64(stmt, 0);
+    sqlite3_finalize(stmt);
+    return 0;
+}

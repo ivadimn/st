@@ -118,7 +118,7 @@ void put(array_t* arr, size_t index,  void* e) {
     cp = arr->arr + (index * arr->size_pointer); 
     memcpy(cp, e, arr->size_pointer);
     arr->valids[index] = index;
-    printf("from put() %d\n", arr->valids[index]);
+    
 }
 
 /*
@@ -143,8 +143,6 @@ void get(array_t* arr, size_t index,  void* e) {
     uint8_t* cp = arr->arr;
     cp += index * arr->size_pointer;
     if (_isvalid(arr, index)) {
-        printf("valid %d - ", arr->valids[index]);
         memcpy(e, cp, arr->size_pointer);
     }
-    
 }
