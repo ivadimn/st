@@ -12,6 +12,7 @@ int main(int argc, char** argv)
 {
    
     array_t* arr = NULL;
+    pd_t* pd = NULL;
     size_t count = 0;
     conn_t* conn = create_conn("/home/vadim/st/db/data.db");
     open_db(conn);
@@ -22,6 +23,14 @@ int main(int argc, char** argv)
     arr = new_array(A_TYPE_POINTER, count, sizeof(pd_t*));
     pd_select(conn, arr, NULL);
 
+    for (size_t i = 0; i < count; i++)
+    {
+        get(arr, i, &pd);
+        printf("id: %ld ", pd->id);
+        vstr_print(pd->name, stdout);
+    }
+    
+    
     close_db(conn);
     free_conn(conn);
   
