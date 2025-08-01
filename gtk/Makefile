@@ -1,5 +1,5 @@
 
-PROG=one
+PROG=four
 FILES=
 CC=gcc
 
