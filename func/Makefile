@@ -1,6 +1,6 @@
 
-PROG=main
-FILES=animal.c cat.c duck.c
+PROG=ex_object
+FILES=
 CC=gcc
 
 CFLAGS=-Wall -Wextra -Wpedantic -Wno-unused-parameter
