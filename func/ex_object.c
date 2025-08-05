@@ -6,22 +6,22 @@
 //    TypeB
 //    TypeC
 
-#define DECLARE_FUN(type)   elem_t create_##type(Type, type)
+/*#define DECLARE_FUN(type)   elem_t create_##type(Type, type)
 #define DEFINE_FUN(type)    elem_t create_##type(Type t, type val)  \
 {                                                                   \
     elem_t val;                                                     \
                                                                     \
-}                                                                   
+} */                                                                  
 
 typedef enum
 {
-    TYPE_8,
-    TYPE_U8,
-    TYPE_16,
-    TYPE_U16
+    BASE_TYPE,
+    TYPE_A,
+    TYPE_B,
+    TYPE_C
 } Type;
 
-typedef union value_t
+/*typedef union value_t
 {
     int8_t val8;
     uint8_t valu8;
@@ -33,26 +33,29 @@ typedef struct elem_t
 {
     Type type;
     value_t val;
-} elem_t;
+} elem_t; */
 
 
 typedef struct 
 {
-    int dummy;
+    Type type;
 } Base;
 
 typedef struct 
 {
+    Type type;
     char* str;
 } TypeA;
 
 typedef struct 
 {
+    Type type;
     double dbl;
 } TypeB;
 
 typedef struct 
 {
+    Type type;
     int ival;
 } TypeC;
 
@@ -66,16 +69,19 @@ typedef union
 } Object;
 
 
-DECLARE_FUN(int);
+//DECLARE_FUN(int);
 
 int 
 main(int argc, char** argv)
 {
     Object obj;
 
-    obj.type_b.dbl = 250.456;
+    obj.base.type = TYPE_A;
+    obj.type_a.str = "type a";
 
-    printf("type_c = %d\n", obj.type_c.ival);
+    printf("obj type: %d\n", obj.base.type);
+    printf("obj type_a type : %d\n", obj.type_a.type);
+    printf("obj value: %s\n", obj.type_a.str);
 
     return 0;
 }
