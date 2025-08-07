@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdint.h>
+#include <stdlib.h>
 
 //base
 //    TypeA
@@ -82,6 +83,7 @@ main(int argc, char** argv)
     printf("obj type: %d\n", obj.base.type);
     printf("obj type_a type : %d\n", obj.type_a.type);
     printf("obj value: %s\n", obj.type_a.str);
+    printf("size of long: %ld\n", sizeof(long));
 
     return 0;
 }
