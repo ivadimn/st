@@ -1,6 +1,6 @@
 
-PROG=ex_object
-FILES=
+PROG=main
+FILES=common.c
 CC=gcc
 
 CFLAGS=-Wall -Wextra -Wpedantic -Wno-unused-parameter

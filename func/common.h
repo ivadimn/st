@@ -2,6 +2,7 @@
 #define _COMMON_H_
 
 #include <stddef.h>
+#include <stdio.h>
 
 #define DBOBJECT_NAME_LEN 64
 
@@ -49,7 +50,7 @@ typedef struct blob_t
 {
     type_t type;
     void* value;
-} blon_t;
+} blob_t;
 
 typedef union object_t
 {
@@ -62,12 +63,23 @@ typedef union object_t
 } object_t;
 
 
-typedef struct sarray_t
+typedef struct varray_t
 {
-    char** arr;
+    object_t *items;
     size_t size;
     size_t length;
 
-} sarray_t;
+} varray_t;
+
+//object functions
+
+void print_object(object_t obj, FILE* f);
+
+//array functions
+varray_t* new_array(size_t size);
+void free_array(varray_t *arr);
+
+void array_add_item(varray_t *arr, object_t item);
+int array_get_item(varray_t *arr, size_t index, object_t *item);
 
 #endif

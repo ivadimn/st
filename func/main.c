@@ -2,32 +2,36 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "animal.h"
-#include "cat.h"
-#include "duck.h"
+#include "common.h"
 
 int main(int argc, char** argv)
 {
-    animal_t* animal = animal_new();
-    cat_t* cat = cat_new();
-    duck_t* duck = duck_new();
+    object_t obj;
+    varray_t *arr;
+    size_t index = 0;
 
+    arr = new_array(10);
+    obj.base.type = TYPE_INT;
+    obj.int_val.value = 25;
+    array_add_item(arr, obj);
 
-    animal_ctor(animal);
-    cat_ctor(cat);
-    duck_ctor(duck);
+    obj.base.type = TYPE_REAL;
+    obj.real_val.value = 104.567;
+    array_add_item(arr, obj);
 
-    animal_sound(animal);
-    animal_sound((animal_t*) cat);
-    animal_sound((animal_t*) duck);
+    obj.base.type = TYPE_TEXT;
+    obj.text_val.value = "Text value 1";
+    array_add_item(arr, obj);
 
-    animal_dtor(animal);
-    cat_dtor(cat);
-    duck_dtor(duck);
-
-    free(animal);
-    free(cat);
-    free(duck);
-
+    obj.base.type = TYPE_TEXT;
+    obj.text_val.value = "Text value 2";
+    array_add_item(arr, obj);
+   
+    while (array_get_item(arr, index, &obj) == 0)
+    {
+        print_object(obj, stdout);
+        index++;
+    }
+    
     return 0;
 }
