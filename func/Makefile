@@ -1,6 +1,6 @@
 
 PROG=main
-FILES=common.c
+FILES=common.c dml.c
 CC=gcc
 
 CFLAGS=-Wall -Wextra -Wpedantic -Wno-unused-parameter

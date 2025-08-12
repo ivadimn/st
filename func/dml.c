@@ -1,5 +1,71 @@
 #include <string.h>
+#include <stdarg.h>
+#include <stdlib.h>
 #include "dml.h"
+
+
+table_t* new_table(char* name, char *link_f, size_t count_fields, ...)
+{
+    table_t *t = (table_t*) malloc(sizeof(table_t));
+    if (t == NULL)
+        return NULL;
+   
+    strncpy(t->name, name, DBOBJECT_NAME_LEN - 1);
+    if (link_f)
+        snprintf(t->link_field, DBOBJECT_NAME_LEN * 2, "%s.%s", t->name, link_f);
+
+    t->fields = NULL;
+    t->fcount = 0;
+    if (count_fields == 0)
+        return t;
+    
+    t->fields = (field_t*) malloc(sizeof(field_t) * count_fields);
+    if (t->fields == NULL)
+        return NULL;
+        
+    t->fcount = count_fields;
+
+    va_list fs;
+    va_start(fs, count_fields);
+    for (size_t i = 0; i < count_fields; i++)
+    {
+        t->fields[i].type = TYPE_TEXT;
+        strncpy(t->fields[i].name, va_arg(fs, char*), DBOBJECT_NAME_LEN);
+           
+    }
+    va_end(fs);
+    return t;
+    
+}
+
+void free_table(table_t *t)
+{
+    if (t->fields != NULL)
+        free(t->fields);
+    free(t);    
+}
+
+
+void str_fields(table_t *t, char* buf)
+{
+    size_t wrote = 0;
+    if (t->fcount == 0)
+        return;
+    
+    snprintf(buf, DBOBJECT_NAME_LEN * 2 - 1, " %s.%s", t->name, t->fields[0].name)
+}
+
+void print_table_info(table_t *t)
+{
+    printf("Table name: %s\n", t->name);
+    printf("Link field: %s\n", t->link_field);
+    for (size_t i = 0; i < t->fcount; i++)
+    {
+        printf("\tField name: %s type: %d pk is %d\n", t->fields[i].name, t->fields[i].type, t->fields[i].pk);
+    }
+    
+}
+
 
 void dml_select1(char* sql, varray_t* tables, field_t* fields, varray_t* params)
 {

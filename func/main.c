@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "common.h"
+#include "dml.h"
 
 int main(int argc, char** argv)
 {
@@ -10,28 +11,15 @@ int main(int argc, char** argv)
     varray_t *arr;
     size_t index = 0;
 
-    arr = new_array(10);
-    obj.base.type = TYPE_INT;
-    obj.int_val.value = 25;
-    array_add_item(arr, obj);
+    table_t *t = new_table("Table", "id", 3, "id", "name", "comment");
+    print_table_info(t);
+    free_table(t);
 
-    obj.base.type = TYPE_REAL;
-    obj.real_val.value = 104.567;
-    array_add_item(arr, obj);
+    /*field_t f = {.name = "filed1", .pk = 0, .type = TYPE_INT};
+    printf("name: %s\n", f.name);
+    printf("pk: %d\n", f.pk);
+    printf("type: %d\n", f.type);*/
 
-    obj.base.type = TYPE_TEXT;
-    obj.text_val.value = "Text value 1";
-    array_add_item(arr, obj);
 
-    obj.base.type = TYPE_TEXT;
-    obj.text_val.value = "Text value 2";
-    array_add_item(arr, obj);
-   
-    while (array_get_item(arr, index, &obj) == 0)
-    {
-        print_object(obj, stdout);
-        index++;
-    }
-    
     return 0;
 }

@@ -4,7 +4,7 @@
 #include <stddef.h>
 #include <stdio.h>
 
-#define DBOBJECT_NAME_LEN 64
+#define DBOBJECT_NAME_LEN 32
 
 typedef unsigned char bool_t;
 
