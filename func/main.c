@@ -5,6 +5,8 @@
 #include "common.h"
 #include "dml.h"
 
+char buf[512];
+
 int main(int argc, char** argv)
 {
     object_t obj;
@@ -13,6 +15,10 @@ int main(int argc, char** argv)
 
     table_t *t = new_table("Table", "id", 3, "id", "name", "comment");
     print_table_info(t);
+
+
+    str_fields(t, buf);
+    printf("SELECT %s\n", buf);
     free_table(t);
 
     /*field_t f = {.name = "filed1", .pk = 0, .type = TYPE_INT};

@@ -52,7 +52,12 @@ void str_fields(table_t *t, char* buf)
     if (t->fcount == 0)
         return;
     
-    snprintf(buf, DBOBJECT_NAME_LEN * 2 - 1, " %s.%s", t->name, t->fields[0].name)
+    wrote = snprintf(buf, DBOBJECT_NAME_LEN * 2 - 1, " %s.%s", t->name, t->fields[0].name);
+    for (size_t i = 1; i < t->fcount; i++)
+    {
+        wrote += snprintf(buf + wrote, DBOBJECT_NAME_LEN * 2 - 1, ", %s.%s", t->name, t->fields[i].name);
+    }
+    
 }
 
 void print_table_info(table_t *t)
