@@ -4,16 +4,14 @@
 #include "dml.h"
 
 
-table_t* new_table(char* name, char *link_f, size_t count_fields, ...)
+table_t* new_table(char* name, size_t count_fields, ...)
 {
     table_t *t = (table_t*) malloc(sizeof(table_t));
     if (t == NULL)
         return NULL;
    
     strncpy(t->name, name, DBOBJECT_NAME_LEN - 1);
-    if (link_f)
-        snprintf(t->link_field, DBOBJECT_NAME_LEN * 2, "%s.%s", t->name, link_f);
-
+    
     t->fields = NULL;
     t->fcount = 0;
     if (count_fields == 0)
