@@ -61,7 +61,6 @@ void str_fields(table_t *t, char* buf)
 void print_table_info(table_t *t)
 {
     printf("Table name: %s\n", t->name);
-    printf("Link field: %s\n", t->link_field);
     for (size_t i = 0; i < t->fcount; i++)
     {
         printf("\tField name: %s type: %d pk is %d\n", t->fields[i].name, t->fields[i].type, t->fields[i].pk);
