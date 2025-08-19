@@ -68,6 +68,46 @@ void print_table_info(table_t *t)
     
 }
 
+/*
+* функции join_t
+*/
+join_t * create_join(table_t *table, size_t count_lf, ...)
+{
+    join_t *join = (join_t*) malloc(sizeof(join_t));
+    if (join == NULL)
+        crit("Ошибка распределения памяти для объекта <join>");
+    
+    memcpy(&(join->table), table, sizeof(table_t));
+    join->count_lf = count_lf;
+    join->joins = NULL;
+
+    if (count_lf == 0)
+        return join;
+    
+    join->lf = new_array(A_TYPE_VALUE, count_lf, sizeof(link_fields_t));
+    
+    va_list fs;
+    va_start(fs, count_lf);
+    for (size_t i = 0; i < count_lf; i++)
+    {
+        put(join->lf, i, va_arg(fs, link_fields_t*));
+    }
+    va_end(fs);
+    return join;
+}
+
+void print_join(join_t *join)
+{
+    
+    printf("Table name: %s\n", join->table.name);
+    for (size_t i = 0; i < join->table.fcount; i++)
+    {
+        
+        
+        printf("\tField name: %s type: %d pk is %d\n", join->table.fields[i].name, join->table.fields[i].type, t->fields[i].pk);
+    }    
+}
+
 
 void dml_select1(char* sql, varray_t* tables, field_t* fields, varray_t* params)
 {

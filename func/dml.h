@@ -48,6 +48,13 @@ void str_fields(table_t *t, char* buf);
 
 void print_table_info(table_t *t);
 
+/*
+* функции join_t
+*/
+join_t * create_join(table_t *table, size_t count_lf, ...);
+
+void print_join(join_t *join);
+
 
 
 void dml_select1(char* sql, varray_t* tables, field_t* fields, varray_t* params);

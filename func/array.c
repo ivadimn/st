@@ -79,7 +79,7 @@ static void _renew(array_t* arr, size_t index) {
 array_t* new_array(atype_t type, size_t size, size_t size_pointer) {
     array_t *arr = malloc(sizeof(array_t));
     if (arr == NULL) 
-        crit("Ошибка распределения памяти!!!\n");
+        crit("Ошибка распределения памяти под массив");
 
     arr->valids = NULL;
     arr->size = size;
@@ -88,7 +88,7 @@ array_t* new_array(atype_t type, size_t size, size_t size_pointer) {
     _alloc(arr);
    
     if (arr->arr == NULL) 
-        crit("Ошибка распределения памяти!!!\n");
+        crit("Ошибка распределения памяти под элементы массива");
         
     return arr;
 }

@@ -40,7 +40,7 @@ void print_object(object_t obj, FILE* f)
     fflush(f);
 }
 
-varray_t* new_array(size_t size)
+varray_t* new_varray(size_t size)
 {
     varray_t *arr = NULL;
     arr = (varray_t*) malloc(sizeof(varray_t));
@@ -55,14 +55,14 @@ varray_t* new_array(size_t size)
     return arr;    
 }
 
-void free_array(varray_t *arr)
+void free_varray(varray_t *arr)
 {
     if (arr->items)
         free(arr->items);
     free(arr);    
 }
 
-void array_add_item(varray_t *arr, object_t item)
+void varray_add_item(varray_t *arr, object_t item)
 {
     if (arr->length == arr->size)
         __resize(arr);
@@ -71,7 +71,7 @@ void array_add_item(varray_t *arr, object_t item)
     arr->length++;        
 }
 
-int array_get_item(varray_t *arr, size_t index, object_t *item)
+int varray_get_item(varray_t *arr, size_t index, object_t *item)
 {
     if (index >= arr->length)
         return 1;

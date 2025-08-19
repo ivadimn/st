@@ -76,10 +76,10 @@ typedef struct varray_t
 void print_object(object_t obj, FILE* f);
 
 //array functions
-varray_t* new_array(size_t size);
-void free_array(varray_t *arr);
+varray_t* new_varray(size_t size);
+void free_varray(varray_t *arr);
 
-void array_add_item(varray_t *arr, object_t item);
-int array_get_item(varray_t *arr, size_t index, object_t *item);
+void varray_add_item(varray_t *arr, object_t item);
+int varray_get_item(varray_t *arr, size_t index, object_t *item);
 
 #endif
