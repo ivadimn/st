@@ -31,6 +31,7 @@ typedef struct table_t
 
 typedef struct join_t
 {
+    join_t* parent;
     table_t table;
     link_fields_t *lf;
     size_t count_lf;
@@ -51,7 +52,8 @@ void print_table_info(table_t *t);
 /*
 * функции join_t
 */
-join_t * create_join(table_t *table, size_t count_lf, ...);
+join_t * create_join(join_t* parent, table_t *table, size_t count_lf, ...);
+void free_join(join_t* join);
 
 void print_join(join_t *join);
 

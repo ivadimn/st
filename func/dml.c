@@ -71,29 +71,56 @@ void print_table_info(table_t *t)
 /*
 * функции join_t
 */
-join_t * create_join(table_t *table, size_t count_lf, ...)
+
+void __add_join(join_t* parent, join_t* child)
+{
+    if (parent->joins == NULL)
+    {
+        /* code */
+    }
+    
+}
+
+
+join_t * create_join(join_t* parent, table_t *table, size_t count_lf, ...)
 {
     join_t *join = (join_t*) malloc(sizeof(join_t));
     if (join == NULL)
         crit("Ошибка распределения памяти для объекта <join>");
     
+    join->parent = parent;    
     memcpy(&(join->table), table, sizeof(table_t));
     join->count_lf = count_lf;
+    join->lf = NULL;
     join->joins = NULL;
 
     if (count_lf == 0)
         return join;
     
-    join->lf = new_array(A_TYPE_VALUE, count_lf, sizeof(link_fields_t));
+    join->lf = (link_fields_t*) malloc(sizeof(link_fields_t) * count_lf);
     
     va_list fs;
     va_start(fs, count_lf);
     for (size_t i = 0; i < count_lf; i++)
     {
-        put(join->lf, i, va_arg(fs, link_fields_t*));
+        memcpy(&(join->lf[i]), va_arg(fs, link_fields_t*), sizeof(link_fields_t));
     }
     va_end(fs);
+    if (parent)
+    {
+        /* code */
+    }
+    
     return join;
+}
+
+void free_join(join_t* join)
+{
+    if (join->lf)
+        free(join->lf);
+    if (join->joins)
+        del_array(join->joins);
+    free(join);
 }
 
 void print_join(join_t *join)
@@ -102,10 +129,17 @@ void print_join(join_t *join)
     printf("Table name: %s\n", join->table.name);
     for (size_t i = 0; i < join->table.fcount; i++)
     {
-        
-        
-        printf("\tField name: %s type: %d pk is %d\n", join->table.fields[i].name, join->table.fields[i].type, t->fields[i].pk);
+        printf("\tField name: %s type: %d pk is %d\n", join->table.fields[i].name, 
+            join->table.fields[i].type, join->table.fields[i].pk);
     }    
+    if (join->lf)
+    {
+        printf("Link fields:\n");
+        for (size_t i = 0; i < join->count_lf; i++)
+        {
+            printf("%s %s %s\n", join->lf[i].f1, join->lf[i].op, join->lf[i].f2);
+        }
+    }
 }
 
 

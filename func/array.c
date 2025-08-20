@@ -17,6 +17,8 @@ static int _isvalid(array_t *arr, size_t index) {
 */
 static void _valid(array_t *arr) {
     arr->valids = (int*) malloc(arr->size * sizeof(int));
+    if(arr->valids == NULL)
+        crit("Ошибка распределения памяти для массива валидаторов\n");
     for (size_t i = 0; i < arr->size; i++) {
         arr->valids[i] = -1;
     }
@@ -42,10 +44,9 @@ static void _revalid(array_t *arr, size_t index) {
 */
 static void _alloc(array_t* arr) {
     _valid(arr);
-    if(arr->valids == NULL)
-        crit("Ошибка распределения памяти для массива валидаторов\n");
-    
     arr->arr = (uint8_t*) calloc(arr->size * arr->size_pointer,  sizeof(uint8_t));
+    if(arr->arr == NULL)
+        crit("Ошибка распределения памяти для элементов массива\n");
 }
 
 
@@ -67,10 +68,8 @@ static void _realloc(array_t* arr, size_t index) {
 static void _renew(array_t* arr, size_t index) {
 
     _realloc(arr, index); 
-    if (arr->arr == NULL) {
-        printf("Ошибка распределения памяти!!!");
-        exit(1);
-    }
+    if (arr->arr == NULL) 
+        crit("Ошибка распределения памяти при изменение размера массива");
 }
 
 /*
