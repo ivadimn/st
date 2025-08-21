@@ -32,7 +32,7 @@ int main(int argc, char** argv)
     link_fields_t lf1 = {.f1 = "field1", .f2 = "field2", .op = "<="};
     link_fields_t lf2 = {.f1 = "field3", .f2 = "field4", .op = "="};
 
-    join_t *root = create_join(t, 2,  &lf1, &lf2);
+    join_t *root = create_join(NULL, t, 2,  &lf1, &lf2);
     print_join(root);
     
     free_join(root);

@@ -6,6 +6,8 @@
 
 #define OP_LEN 3
 
+typedef struct join_t join_t;
+
 typedef struct link_fields_t
 {
     char f1[DBOBJECT_NAME_LEN * 2 + 1];
