@@ -85,10 +85,7 @@ array_t* new_array(atype_t type, size_t size, size_t size_pointer) {
     arr->type = type;
     arr->size_pointer = size_pointer;
     _alloc(arr);
-   
-    if (arr->arr == NULL) 
-        crit("Ошибка распределения памяти под элементы массива");
-        
+           
     return arr;
 }
 /*

@@ -16,25 +16,23 @@ int main(int argc, char** argv)
     table_t *t = new_table("Table", 3, "id", "name", "comment");
     print_table_info(t);
 
-    table_t t2 = *t;
     
-    printf("address t: %p\n", (void*)t);
-    printf("address t->fields: %p\n", (void*)t->fields);
-    printf("address t2: %p\n", (void*)&t2);
-    printf("address t2->fields: %p\n", (void*)&(t2.fields));
-
-    print_table_info(&t2);
-
-
     str_fields(t, buf);
-    printf("SELECT %s\n", buf);
+    printf("--------------------\n");
+
+    join_t *root = create_join(NULL, t, 0);
+
+    table_t *t1 = new_table("Table_1", 3, "id1", "name1", "comment1");
 
     link_fields_t lf1 = {.f1 = "field1", .f2 = "field2", .op = "<="};
     link_fields_t lf2 = {.f1 = "field3", .f2 = "field4", .op = "="};
 
-    join_t *root = create_join(NULL, t, 2,  &lf1, &lf2);
+    join_t *j1 = create_join(root, t1, 2,  &lf1, &lf2);
+
+    
     print_join(root);
     
+    free_join(j1);
     free_join(root);
     free_table(t);
    

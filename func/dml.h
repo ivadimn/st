@@ -37,6 +37,7 @@ typedef struct join_t
     table_t table;
     link_fields_t *lf;
     size_t count_lf;
+    size_t count_joins;
     array_t* joins;
 } join_t;
 

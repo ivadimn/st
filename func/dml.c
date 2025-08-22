@@ -75,10 +75,9 @@ void print_table_info(table_t *t)
 void __add_join(join_t* parent, join_t* child)
 {
     if (parent->joins == NULL)
-    {
-        /* code */
-    }
-    
+        parent->joins = new_array(A_TYPE_POINTER, 8, sizeof(join_t*));
+    put(parent->joins, parent->count_joins, child);    
+    parent->count_joins++;
 }
 
 
@@ -87,12 +86,13 @@ join_t * create_join(join_t* parent, table_t *table, size_t count_lf, ...)
     join_t *join = (join_t*) malloc(sizeof(join_t));
     if (join == NULL)
         crit("Ошибка распределения памяти для объекта <join>");
+      
     
-    join->parent = parent;    
     memcpy(&(join->table), table, sizeof(table_t));
     join->count_lf = count_lf;
     join->lf = NULL;
     join->joins = NULL;
+    join->count_joins = 0;
 
     if (count_lf == 0)
         return join;
@@ -106,10 +106,10 @@ join_t * create_join(join_t* parent, table_t *table, size_t count_lf, ...)
         memcpy(&(join->lf[i]), va_arg(fs, link_fields_t*), sizeof(link_fields_t));
     }
     va_end(fs);
+    
+    join->parent = parent;    
     if (parent)
-    {
-        /* code */
-    }
+        __add_join(parent, join);
     
     return join;
 }
@@ -125,7 +125,7 @@ void free_join(join_t* join)
 
 void print_join(join_t *join)
 {
-    
+    join_t *child;
     printf("Table name: %s\n", join->table.name);
     for (size_t i = 0; i < join->table.fcount; i++)
     {
@@ -140,6 +140,12 @@ void print_join(join_t *join)
             printf("%s %s %s\n", join->lf[i].f1, join->lf[i].op, join->lf[i].f2);
         }
     }
+    for (size_t i = 0; i < join->count_joins; i++)
+    {
+        get(join->joins, i, &child);
+        print_join(child);
+    }
+    
 }
 
 
