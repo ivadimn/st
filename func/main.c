@@ -6,6 +6,7 @@
 #include "dml.h"
 
 char buf[512];
+char sql[SQL_QUERY_LEN];
 
 int main(int argc, char** argv)
 {
@@ -14,11 +15,11 @@ int main(int argc, char** argv)
     size_t index = 0;
 
     table_t *t = new_table("Table", 3, "id", "name", "comment");
-    print_table_info(t);
+    /*print_table_info(t);
 
     
     str_fields(t, buf);
-    printf("--------------------\n");
+    printf("--------------------\n");*/
 
     join_t *root = create_join(NULL, t, 0);
 
@@ -28,20 +29,18 @@ int main(int argc, char** argv)
     link_fields_t lf2 = {.f1 = "field3", .f2 = "field4", .op = "="};
 
     join_t *j1 = create_join(root, t1, 2,  &lf1, &lf2);
-
+    printf("Table name: %s\n", j1->table.name);
     
-    print_join(root);
+    print_join(root, 1);
+
+    printf("--------------------------------------------------------\n");
+    dml_select1(sql, root, NULL);
+    printf("SQL: %s\n", sql);
+
     
     free_join(j1);
     free_join(root);
     free_table(t);
-   
-
-    /*field_t f = {.name = "filed1", .pk = 0, .type = TYPE_INT};
-    printf("name: %s\n", f.name);
-    printf("pk: %d\n", f.pk);
-    printf("type: %d\n", f.type);*/
-
 
     return 0;
 }

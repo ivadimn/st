@@ -2,6 +2,7 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include "dml.h"
+#include "vstrex.h"
 
 
 table_t* new_table(char* name, size_t count_fields, ...)
@@ -76,7 +77,7 @@ void __add_join(join_t* parent, join_t* child)
 {
     if (parent->joins == NULL)
         parent->joins = new_array(A_TYPE_POINTER, 8, sizeof(join_t*));
-    put(parent->joins, parent->count_joins, child);    
+    put(parent->joins, parent->count_joins, &child);    
     parent->count_joins++;
 }
 
@@ -94,6 +95,10 @@ join_t * create_join(join_t* parent, table_t *table, size_t count_lf, ...)
     join->joins = NULL;
     join->count_joins = 0;
 
+    join->parent = parent;    
+    if (join->parent) 
+        __add_join(join->parent, join);
+
     if (count_lf == 0)
         return join;
     
@@ -106,11 +111,7 @@ join_t * create_join(join_t* parent, table_t *table, size_t count_lf, ...)
         memcpy(&(join->lf[i]), va_arg(fs, link_fields_t*), sizeof(link_fields_t));
     }
     va_end(fs);
-    
-    join->parent = parent;    
-    if (parent)
-        __add_join(parent, join);
-    
+       
     return join;
 }
 
@@ -123,9 +124,12 @@ void free_join(join_t* join)
     free(join);
 }
 
-void print_join(join_t *join)
+void print_join(join_t *join, int level)
 {
     join_t *child;
+    printf("-------------------- Level %d ---------------------------\n", level);
+    printf("Parent: %p\n", (void*) join->parent);
+    printf("Self: %p\n", (void*) join);
     printf("Table name: %s\n", join->table.name);
     for (size_t i = 0; i < join->table.fcount; i++)
     {
@@ -143,13 +147,45 @@ void print_join(join_t *join)
     for (size_t i = 0; i < join->count_joins; i++)
     {
         get(join->joins, i, &child);
-        print_join(child);
+        print_join(child, level + 1);
     }
-    
 }
 
 
-void dml_select1(char* sql, varray_t* tables, field_t* fields, varray_t* params)
+void dml_select1(char* sql, join_t* join, varray_t* params)
 {
+    vstr_t* sel = vstr_create(2048);
+    //size_t wrote = 0;
+    char fs[SEL_BUFF_LEN];
+    char fa[SEL_BUFF_LEN];
+    join_t* child;
+    str_fields(&(join->table), fs);
+    snprintf(fa, 1023, "SELECT %s FROM %s ", fs, join->table.name);
+    vstr_append(sel, fa);
+    for (size_t i = 0; i < join->count_joins; i++)
+    {
+        get(join->joins, i, &child);
+        snprintf(fa, 1023, "JOIN %s ON ", child->table.name);
+        vstr_append(sel, fa);
+        if (child->count_lf > 0)
+        {
+            snprintf(fa, 1023, "%s.%s %s %s.%s ", join->table.name, child->lf[0].f1, 
+                                       child->lf[0].op, 
+                                       child->table.name, child->lf[0].f2);
+            vstr_append(sel, fa);                           
+        }
+        
+        for (size_t j = 1; j < child->count_lf; j++)
+        {
+            snprintf(fa, 1023, "AND %s.%s %s %s.%s ", join->table.name, child->lf[j].f1, 
+                                       child->lf[j].op, 
+                                      child->table.name, child->lf[j].f2);
+            vstr_append(sel, fa);
+        }
+        vstr_append(sel, ";");
+    }
+    
+    vstr_get_data(sel, sql, SQL_QUERY_LEN);
+    vstr_free(sel);
     
 }

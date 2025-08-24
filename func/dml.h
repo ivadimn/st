@@ -5,6 +5,8 @@
 #include "array.h"
 
 #define OP_LEN 3
+#define SEL_BUFF_LEN 256
+#define SQL_QUERY_LEN 2048
 
 typedef struct join_t join_t;
 
@@ -58,11 +60,11 @@ void print_table_info(table_t *t);
 join_t * create_join(join_t* parent, table_t *table, size_t count_lf, ...);
 void free_join(join_t* join);
 
-void print_join(join_t *join);
+void print_join(join_t *join, int level);
 
 
 
-void dml_select1(char* sql, varray_t* tables, field_t* fields, varray_t* params);
+void dml_select1(char* sql, join_t* join, varray_t* params);
 
 
 #endif
