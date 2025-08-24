@@ -5,7 +5,7 @@
 #include "array.h"
 
 #define OP_LEN 3
-#define SEL_BUFF_LEN 256
+#define SEL_BUFF_LEN 1024
 #define SQL_QUERY_LEN 2048
 
 typedef struct join_t join_t;

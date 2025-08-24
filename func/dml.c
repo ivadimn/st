@@ -156,12 +156,25 @@ void dml_select1(char* sql, join_t* join, varray_t* params)
 {
     vstr_t* sel = vstr_create(2048);
     //size_t wrote = 0;
-    char fs[SEL_BUFF_LEN];
+    char fs[SEL_BUFF_LEN / 2];
     char fa[SEL_BUFF_LEN];
     join_t* child;
     str_fields(&(join->table), fs);
-    snprintf(fa, 1023, "SELECT %s FROM %s ", fs, join->table.name);
+    snprintf(fa, SEL_BUFF_LEN - 1, "SELECT %s", fs);
     vstr_append(sel, fa);
+    for (size_t i = 0; i < join->count_joins; i++)
+    {
+        get(join->joins, i, &child);
+        if (child->table.fcount == 0)
+            continue;
+        
+        str_fields(&(child->table), fs);
+        snprintf(fa, SEL_BUFF_LEN - 1, ", %s ", fs);
+        vstr_append(sel, fa);
+    }
+    snprintf(fa, SEL_BUFF_LEN - 1, "FROM %s ", join->table.name);
+    vstr_append(sel, fa);
+
     for (size_t i = 0; i < join->count_joins; i++)
     {
         get(join->joins, i, &child);
