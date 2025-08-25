@@ -4,6 +4,7 @@
 
 #include "common.h"
 #include "dml.h"
+#include "connection.h"
 
 char buf[512];
 char sql[SQL_QUERY_LEN];
@@ -41,6 +42,14 @@ int main(int argc, char** argv)
     free_join(j1);
     free_join(root);
     free_table(t);
+
+    conn_param_t* cp = init_conn_param("10.0.0.101", "5432", "dev", "7922448", "gaz");
+    conn_t* conn = new_connection(cp);
+    connect(conn);
+    disconnect(conn);
+    del_connection(conn);
+    release_conn_param(cp);
+
 
     return 0;
 }

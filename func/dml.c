@@ -2,7 +2,8 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include "dml.h"
-#include "vstrex.h"
+#include "../lib/src/vstrex.h"
+#include "../lib/src/log.h"
 
 
 table_t* new_table(char* name, size_t count_fields, ...)
@@ -178,11 +179,11 @@ void dml_select1(char* sql, join_t* join, varray_t* params)
     for (size_t i = 0; i < join->count_joins; i++)
     {
         get(join->joins, i, &child);
-        snprintf(fa, 1023, "JOIN %s ON ", child->table.name);
+        snprintf(fa, SEL_BUFF_LEN - 1, "JOIN %s ON ", child->table.name);
         vstr_append(sel, fa);
         if (child->count_lf > 0)
         {
-            snprintf(fa, 1023, "%s.%s %s %s.%s ", join->table.name, child->lf[0].f1, 
+            snprintf(fa, SEL_BUFF_LEN - 1, "%s.%s %s %s.%s ", join->table.name, child->lf[0].f1, 
                                        child->lf[0].op, 
                                        child->table.name, child->lf[0].f2);
             vstr_append(sel, fa);                           
@@ -190,7 +191,7 @@ void dml_select1(char* sql, join_t* join, varray_t* params)
         
         for (size_t j = 1; j < child->count_lf; j++)
         {
-            snprintf(fa, 1023, "AND %s.%s %s %s.%s ", join->table.name, child->lf[j].f1, 
+            snprintf(fa, SEL_BUFF_LEN - 1, "AND %s.%s %s %s.%s ", join->table.name, child->lf[j].f1, 
                                        child->lf[j].op, 
                                       child->table.name, child->lf[j].f2);
             vstr_append(sel, fa);

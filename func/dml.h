@@ -2,7 +2,7 @@
 #define _DML_H_
 
 #include "common.h"
-#include "array.h"
+#include "../lib/src/array.h"
 
 #define OP_LEN 3
 #define SEL_BUFF_LEN 1024
