@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <libpq-fe.h>
 #include "connection.h"
 #include "../lib/src/log.h"
 
+static PGconn* db; 
 
 conn_param_t* init_conn_param(const char* host,
                             const char* port,
@@ -48,12 +48,16 @@ void del_connection(conn_t* conn)
     free(conn);
 }
 
-void connect(conn_t *conn)
+void connect1(conn_t *conn)
 {
+   
     printf("before call connect %s\n", conn->conn_str);
-    conn->db = PQconnectdb(conn->conn_str);
+    char conninfo[MAX_LEN];
+    sprintf(conninfo, "hostaddr=%s port=5432 user=%s password=%s dbname=%s", 
+                "10.0.0.101", "dev", "7922448", "gaz");
+    db = PQconnectdb(conninfo);
     printf("call connect\n");
-    if (PQstatus(conn->db) != CONNECTION_OK) {
+    if (PQstatus(db) != CONNECTION_OK) {
         printf("connect failure\n");
         err("Ошибка подключения к серверу: %s", PQerrorMessage(conn->db));
         PQfinish(conn->db);

@@ -35,7 +35,7 @@ void release_conn_param(conn_param_t* cp);
 conn_t* new_connection(conn_param_t *cp);
 void del_connection(conn_t* conn);
 
-void connect(conn_t *conn);
+void connect1(conn_t *conn);
 void disconnect(conn_t* conn);
 
 

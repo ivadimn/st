@@ -1,6 +1,6 @@
 
 PROG=main
-FILES=dml.c connection.c common.c
+FILES=
 CC=gcc
 
 CFLAGS=-Wall -Wextra -Wpedantic -Wno-unused-parameter `pkg-config --cflags libpq`

@@ -4,8 +4,6 @@
 #include <stddef.h>
 #include <stdio.h>
 
-#define DBOBJECT_NAME_LEN 32
-
 typedef unsigned char bool_t;
 
 typedef enum  type_t
