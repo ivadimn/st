@@ -52,10 +52,8 @@ void connect1(conn_t *conn)
 {
    
     printf("before call connect %s\n", conn->conn_str);
-    char conninfo[MAX_LEN];
-    sprintf(conninfo, "hostaddr=%s port=5432 user=%s password=%s dbname=%s", 
-                "10.0.0.101", "dev", "7922448", "gaz");
-    db = PQconnectdb(conninfo);
+        
+    db = PQconnectdb(conn->conn_str);
     printf("call connect\n");
     if (PQstatus(db) != CONNECTION_OK) {
         printf("connect failure\n");

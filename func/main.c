@@ -39,7 +39,7 @@ int main(int argc, char** argv)
     free_table(t); */
 
     
-    conn_param_t* cp = init_conn_param("10.0.0.101", "5432", "dev", "7922448", "gaz");
+    conn_param_t* cp = init_conn_param("192.168.0.114", "5432", "dev", "7922448", "gaz");
     conn_t* conn = new_connection(cp);
     connect1(conn);
     disconnect(conn);
