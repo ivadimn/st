@@ -1,0 +1,10 @@
+CREATE TABLE users(id SERIAL PRIMARY KEY, name TEXT NOT NULL, email TEXT NOT NULL, balance INTEGER NOT NULL);
+
+DROP TABLE users;
+
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+CREATE TABLE users(pid SERIAL PRIMARY KEY, name TEXT NOT NULL, user_id UUID NOT NULL DEFAULT uuid_generate_v4(),
+email TEXT NOT NULL, balance INTEGER NOT NULL, registration TIMESTAMP NOT NULL DEFAULT now());
+
+SELECT uuid_generate_v4(); 
