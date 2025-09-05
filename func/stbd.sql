@@ -24,3 +24,12 @@ ALTER TABLE users ADD CHECK(length(email) <=100);
 ALTER TABLE users ADD COLUMN enabled BOOLEAN NOT NULL DEFAULT true;
 
 ALTER TABLE users DROP COLUMN enabled;
+
+UPDATE users SET balance = balance + 100 WHERE pid = 2;
+
+UPDATE users SET balance = balance + 100 WHERE user_id = '2e3277f0-501b-4698-a64a-89ae5f4afc53';
+
+UPDATE users SET balance = balance + 10;
+UPDATE users SET balance = balance - 100;
+
+UPDATE users SET balance = balance + 100 WHERE balance < 100;
