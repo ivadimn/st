@@ -1,16 +1,36 @@
--- DROP TABLE public.teacher;
-CREATE DATABASE lna;
-CREATE USER develop WITH ENCRYPTED PASSWORD '7922448';
-GRANT ALL PRIVILEGES ON DATABASE lna TO develop;
-ALTER DATABASE lna OWNER TO develop;
-REVOKE CONNECT ON DATABASE lna FROM PUBLIC;
+CREATE DATABASE gaz;
+CREATE USER dev WITH ENCRYPTED PASSWORD '7922448';
+GRANT ALL PRIVILEGES ON DATABASE gaz TO dev;
+ALTER DATABASE gaz OWNER TO dev;
+REVOKE CONNECT ON DATABASE gaz FROM PUBLIC;
 # --------------------------------------------------------------------------
-CREATE USER admin WITH ENCRYPTED PASSWORD '7922448';
-GRANT ALL PRIVILEGES ON DATABASE lna TO admin;
-CREATE USER student WITH ENCRYPTED PASSWORD '7922448';
-GRANT ALL PRIVILEGES ON DATABASE lna TO student;
-CREATE USER teacher WITH ENCRYPTED PASSWORD '7922448';
-GRANT ALL PRIVILEGES ON DATABASE lna TO teacher;
+--CREATE USER admin WITH ENCRYPTED PASSWORD '7922448';
+--GRANT ALL PRIVILEGES ON DATABASE lna TO admin;
+--CREATE USER student WITH ENCRYPTED PASSWORD '7922448';
+--GRANT ALL PRIVILEGES ON DATABASE lna TO student;
+--CREATE USER teacher WITH ENCRYPTED PASSWORD '7922448';
+--GRANT ALL PRIVILEGES ON DATABASE lna TO teacher;
+
+CREATE TABLE position_groups (
+    id serial PRIMARY KEY,
+    name text NOT NULL,
+    level integer NOT NULL
+);
+
+CREATE UNIQUE INDEX position_groups_name_IDX ON position_groups(name);
+CREATE UNIQUE INDEX position_groups_level_IDX ON position_groups(level);
+
+INSERT INTO position_groups(name, level) VALUES ('Уровень 0', 0);
+INSERT INTO position_groups(name, level) VALUES ('Уровень 1', 1);
+INSERT INTO position_groups(name, level) VALUES ('Уровень 2', 2);
+INSERT INTO position_groups(name, level) VALUES ('Уровень 3', 3);
+
+CREATE TABLE positions (
+    id serial PRIMARY KEY,
+    name text NOT NULL,
+    group_id integer,
+    CONSTRAINT position_group_id_FK FOREIGN KEY (group_id) REFERENCES position_groups(id);
+);
 
 
 CREATE TABLE public.teacher (
