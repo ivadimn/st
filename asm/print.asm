@@ -13,5 +13,5 @@ _start:
     syscall
 
     mov rax, 60     ; функция exit
-    xor rdi, rdi    ; кодвозврата 0
+    xor rdi, rdi    ; код возврата 0 помещается в RDI
     syscall 

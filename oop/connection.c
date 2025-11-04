@@ -52,9 +52,7 @@ void connect1(conn_t *conn)
     printf("before call connect %s\n", conn->conn_str);
         
     conn->db = PQconnectdb(conn->conn_str);
-    printf("call connect\n");
     if (PQstatus(conn->db) != CONNECTION_OK) {
-        printf("connect failure\n");
         err("Ошибка подключения к серверу: %s", PQerrorMessage(conn->db));
         PQfinish(conn->db);
         exit(EXIT_FAILURE);

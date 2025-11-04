@@ -1,6 +1,6 @@
 
 PROG=main
-FILES=connection.c person.c person_repository.c
+FILES=connection.c person.c person_repository.c postgres.c param.c row.c
 CC=gcc
 
 CFLAGS=-Wall -Wextra -Wpedantic -Wno-unused-parameter `pkg-config --cflags libpq`

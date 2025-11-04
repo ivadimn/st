@@ -2,6 +2,27 @@
 #include <stdlib.h>
 #include <string.h>
 #include "person_p.h"
+#include "../lib/src/utils.h"
+
+person_t* new_person()
+{
+    return (person_t*) alloc(sizeof(person_t));
+
+}
+void init_person(person_t* person, char* fname, char* sname, char* surname, char* birthday)
+{
+    strncpy(person->first_name, fname, NAME_LEN -1);
+    strncpy(person->secong_name, sname, NAME_LEN -1);
+    strncpy(person->surname, surname, NAME_LEN -1);
+    sscanf(birthday, "%hu-%hhu-%hhu", &(person->birthday.year), 
+                            &(person->birthday.month),
+                            &(person->birthday.day));
+} 
+
+void del_person(person_t* person)
+{
+    free(person);
+}
 
 void get_first_name(person_t* person, char* buf)
 {
@@ -25,7 +46,7 @@ void get_birthday(person_t* person, birthday_t* birthday)
 
 void set_first_name(person_t* person, char* buf)
 {
-    strncpy(person->first_name, buf, NAME_LEN -1);    
+    strncpy(person->first_name, buf, NAME_LEN -1);
 }
 
 void set_second_name(person_t* person, char* buf)
@@ -45,7 +66,7 @@ void set_birthday(person_t* person, birthday_t* birthday)
 
 void set_birthday_raw(person_t* person, char* buf)
 {
-    sscanf(buf, "%d-%d-%d", &(person->birthday.year), 
+    sscanf(buf, "%hu-%hhu-%hhu", &(person->birthday.year), 
                             &(person->birthday.month),
                             &(person->birthday.day));
 }
@@ -62,5 +83,9 @@ void print_person(person_t* person)
                                             person->birthday.year
                                             );
     printf("%s\n", buf);
-    
+}
+
+void format_birthday(person_t* p)
+{
+    snprintf(p->birthday.str, DATE_LEN, "%d-%d-%d", p->birthday.year, p->birthday.month, p->birthday.day);
 }

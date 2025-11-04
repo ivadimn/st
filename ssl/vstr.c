@@ -4,14 +4,15 @@
 #include <string.h>
 #include <stdint.h>
 #include <ctype.h>
+#
 
 #define MAX_PART 8192
 typedef enum state { ONE, TWO } state_t;
 
 typedef struct {
-    uint8_t *data;
-    long size;
-    long length;
+    uint16_t *data;
+    size_t length;
+    size_t size;              
 } vstr_t;  
 
 typedef struct {
@@ -20,6 +21,7 @@ typedef struct {
     long length;
 } vstr_array_t;
 
+long vstr_array_adds(vstr_array_t* arr, const char* str);
 
 
 
@@ -35,22 +37,117 @@ static long inhex(uint8_t ch) {
 }
 
 /*
+* увеличить буфер до нового размера
+*/
+static int _reset_data(vstr_t* str, size_t length)
+{
+    
+    str->data = (uint16_t*)realloc(str->data, length);
+    int result = (str->data == NULL) ? 1 : 0;
+    return result;
+}
+
+/*
+* разместить строку в буфере
+*/
+static size_t __to_data(uint16_t* data, uint8_t* buffer, size_t len)
+{
+    size_t i = 0, index = 0;
+    while(i < len)
+    {
+        if (buffer[i] < 128)
+        {
+            data[index++] = buffer[i] & 0x00ff; 
+            i++;
+        }
+        else 
+        {
+            data[index] = buffer[i];
+            data[index] = (data[index] << 8) | buffer[i+1];
+            index++;
+            i += 2;
+        }
+    }
+    return index;
+}
+
+/*
+* получить строку из буфера
+*/
+static void __from_data(uint16_t* data, uint8_t* buffer)
+{
+    
+}
+
+/*
+* положить строку
+*/
+static int _put_data(vstr_t* str, uint8_t* buffer)
+{
+    size_t len = strlen((const char*) buffer);
+    if (len > str->size)
+        if (_reset_data(str->data, len))
+            return 1;
+    
+    str->length = __to_data(str->data, buffer, len);    
+    return 0;
+}
+
+/*
 * создаёт строку размером size
 */
-vstr_t* vstr_create(long size) {
+vstr_t* vstr_create(size_t size) {
     vstr_t* str = (vstr_t*) malloc(sizeof(vstr_t));
     if (str == NULL)
         return NULL;
-    str->data = (uint8_t*)malloc(sizeof(uint8_t) * (size + 1));
+    str->data = (uint16_t*)malloc(sizeof(uint16_t) * size);
     if (str->data == NULL) {
         free(str);
         return NULL;
     }
-    memset(str->data, 0, sizeof(uint8_t) * (size + 1));
-    str->size = size + 1;
+    memset(str->data, 0, sizeof(uint16_t) * size);
+    str->size = size;
     str->length = 0;
     return str;
 }
+
+/*
+* уничтожает строку и освоброждает память
+*/
+void vstr_free(vstr_t* str) {
+    free(str->data);
+    free(str);
+}
+
+/*
+* очищает строку заполняя её нулями
+*/
+void vstr_clear(vstr_t* str) {
+    memset(str->data, 0, sizeof(uint16_t) * str->size);
+}
+
+/*
+* возвращает размер буфера для строки
+*/
+size_t vstr_size(vstr_t* str) {
+    return str->size;
+}
+
+/*
+* возвращает текущую длину строки
+*/
+size_t vstr_len(vstr_t* str) {
+    return str->length;
+}
+
+/*
+* возвращает текущую длину строки в байтах
+*/
+size_t vstr_len_bytes(vstr_t* str) {
+    return strlen((const char*) str->data);
+}
+
+
 
 /* сложить строки
 * переменное число аргументов char*
@@ -77,45 +174,14 @@ vstr_t* vstr_plus(long count, ...) {
     }
     va_end(ap); 
     str->data[len] = '\0'; 
-    str->length = len;
     return str;
-}
-
-/*
-* уничтожает строку и освоброждает память
-*/
-void vstr_free(vstr_t* str) {
-    free(str->data);
-    free(str);
-}
-
-/*
-* очищает строку заполняя её нулями
-*/
-void vstr_clear(vstr_t* str) {
-    memset(str->data, 0, str->size);
-    str->length = 0;
-}
-
-/*
-* возвращает размер буфера для строки
-*/
-size_t vstr_size(vstr_t* str) {
-    return str->size;
-}
-
-/*
-* возвращает текущую длину строки
-*/
-size_t vstr_len(vstr_t* str) {
-    return str->length;
 }
 
 /*
 * напечатать строку
 */
 void vstr_print(vstr_t* str, FILE* f) {
-    fwrite(str->data, sizeof(uint8_t), str->length, f);
+    fwrite(str->data, sizeof(uint8_t), strlen(str->data), f);
     fwrite("\n", 1, 1, f);
 }
 
@@ -123,7 +189,7 @@ void vstr_print(vstr_t* str, FILE* f) {
 * печатает 16 представление символов в строке
 */
 void vstr_print_data(vstr_t* str, FILE* f) {
-    for (long i = 0; i < str->length; i++) {
+    for (long i = 0; i < strlen(str->data); i++) {
         fprintf(f, "%x ", str->data[i]);
     }
     fprintf(f, "\n");
@@ -139,8 +205,7 @@ void vstr_assign(vstr_t *str, const char* value) {
     long len = strlen(value);
     if (len < str->size) {
         memcpy(str->data, tmp, len);
-        str->data[len] = 0;
-        str->length = len;
+        str->data[len] = '\0';
     }
 }
 
@@ -152,7 +217,7 @@ vstr_t* vstr_dup(const char* source) {
     vstr_t* dest = vstr_create(len);
     if (dest) { 
         memcpy(dest->data, source, len);
-        dest->length = len;
+        dest->data[len] = '\0';
     }    
     return dest;
 }
@@ -161,13 +226,14 @@ vstr_t* vstr_dup(const char* source) {
 * выполняет конкатенацию двух строк и возвращает новую строку
 */
 vstr_t* vstr_concat(vstr_t* left, vstr_t* right) {
-    vstr_t *str = vstr_create(left->length + right->length);
+    size_t len_left = strlen(left->data);
+    size_t len_right = strlen(right->data);
+    vstr_t *str = vstr_create(len_left + len_right);
     if (str == NULL)
         return NULL;
-    memcpy(str->data, left->data, left->length);
-    memcpy(str->data + left->length, right->data, right->length);
-    str->length = left->length + right->length;
-    str->data[str->length] = 0;
+    memcpy(str->data, left->data, len_left);
+    memcpy(str->data + len_left, right->data, len_right);
+    str->data[len_left + len_right] = '\0';
     return str;
 }
 
@@ -176,7 +242,7 @@ vstr_t* vstr_concat(vstr_t* left, vstr_t* right) {
 vstr_t* vstr_append(vstr_t* left, const char* right) {
     vstr_t *str = NULL;
     long len_r = strlen(right);
-    long len_l = left->length;
+    long len_l = strlen(left->data);
     if (len_l + len_r >= left->size) {
         str = vstr_create(len_l + len_r);
         if (str == NULL)
@@ -187,16 +253,16 @@ vstr_t* vstr_append(vstr_t* left, const char* right) {
         str = left;
     }
     memcpy(str->data + len_l, right, len_r);
-    str->length = len_l + len_r;
-    str->data[str->length] = 0;
+    str->data[len_l + len_r] = '\0';
     return str;
 }
 
 /*
 * Возвращает индекс вхождения символа в строку или -1
+* переделать 
 */
 long vstr_in(vstr_t *str, char ch) {
-    for (long i = 0; i < str->length; i++)  {
+    for (long i = 0; i < strlen(str->data); i++)  {
         if (str->data[i] == ch)
             return i;
     }
@@ -205,9 +271,10 @@ long vstr_in(vstr_t *str, char ch) {
 
 /*
 * Возвращает символ по заданному индексу или 0
+* переделать 
 */
 uint8_t vstr_at(vstr_t *str, long index) {
-    if (index < str->length)
+    if (index < strlen(str->data))
         return str->data[index];
     return 0;    
     
@@ -220,10 +287,10 @@ uint8_t vstr_at(vstr_t *str, long index) {
 long vstr_instr(vstr_t *str, char* s) {
     char* tmp = (char*)str->data;
     long len = (long)strlen(s);
-    if (str->length < len)
+    if (strlen(str->data) < len)
         return -1;
     
-    for (long index = 0; index <= str->length - len; index++) {
+    for (long index = 0; index <= strlen(str->data) - len; index++) {
         if (strncmp(&tmp[index], s, (size_t) len) == 0)
             return index;
     }
@@ -436,9 +503,14 @@ void vstr_tolower(vstr_t* str)
          else
          {
             ch = str->data[index+1];
-            if (ch >= 0x90 && ch <= 0xaf)
+            if (ch >= 0x90 && ch <= 0x9f)
             {
                 str->data[index+1] = ch + 0x20;    
+            }
+            if (ch >= 0xa0 && ch <= 0xaf)
+            {
+                str->data[index] = 0xd1;    
+                str->data[index+1] = ch - 0x20;    
             }
             else if (ch == 0x81) {
                 str->data[index] = 0xd1;
@@ -446,7 +518,45 @@ void vstr_tolower(vstr_t* str)
             }
             
             
-            printf("%x\n", str->data[index+1]);
+            //printf("%x\n", str->data[index+1]);
+            //str->data[index+1] += 0x20;
+            index += 2;
+         }
+    }
+}
+
+void vstr_toupper(vstr_t* str)
+{
+    uint8_t ch;
+    long index = 0;
+
+    while (index < str->length)
+    {
+         ch = str->data[index];
+         if (ch < 128)
+         {
+            ch = toupper(ch);
+            str->data[index++] = ch;
+         }
+         else
+         {
+            ch = str->data[index+1];
+            if (ch >= 0xb0 && ch <= 0xbf)
+            {
+                str->data[index+1] = ch - 0x20;    
+            }
+            if (ch >= 0x80 && ch <= 0x8f)
+            {
+                str->data[index] = 0xd0;    
+                str->data[index+1] = ch + 0x20;    
+            }
+            else if (ch == 0x91) {
+                str->data[index] = 0xd0;
+                str->data[index+1] = 0x81;
+            }
+            
+            
+            //printf("%x\n", str->data[index+1]);
             //str->data[index+1] += 0x20;
             index += 2;
          }

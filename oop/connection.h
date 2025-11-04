@@ -2,8 +2,8 @@
 #define _CONNECTION_H_
 
 #include <libpq-fe.h>
+#include "const.h"
 
-#define PARAM_LEN 32
 #define CONN_STR_LEN 256
 #define ERR_MSG_LEN 1024
 

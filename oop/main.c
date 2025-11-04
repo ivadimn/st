@@ -9,6 +9,9 @@
 #include "connection.h"
 #include "postgres.h"
 #include "person_repository.h"
+#include "person.h"
+#include "person_p.h"
+
 
 void load_all_persons(conn_t *conn)
 {
@@ -36,12 +39,12 @@ void load_all_persons(conn_t *conn)
 
 }
 
-void query_w_params(PGconn *conn)
+void query_w_params(PGconn *conn, size_t len)
 {
     PGresult   *res;
-    const char *paramValues[1];
-    int         paramLengths[1];
-    int         paramFormats[1];
+    const char *paramValues[len];
+    int         paramLengths[len];
+    int         paramFormats[len];
     uint32_t    binaryIntVal;
 
     /*
@@ -122,18 +125,42 @@ void query_w_params(PGconn *conn)
 
 int main(int argc, char** argv)
 {
-    conn_param_t* cp = init_conn_param("127.0.0.1", "5432", "dev", "7922448", "gaz");
+    conn_param_t* cp = init_conn_param("192.168.0.141", "5432", "dev", "7922448", "gaz");
     conn_t* conn = new_connection(cp);
-    connect1(conn);
+     connect1(conn);
 
-    //query_w_params(conn->db);
+    // query_w_params(conn->db, 1);
     init_person_repository(conn);
-    LOAD_PERSONS(NULL);
+    param_list_t params;
+    params.size = 0;
+    param_t param;
+    value_t value;
+    value.int_value = 7;
+    init_param(&param, "id", ">=", INT, value);
+    param_list_add(&params, &param);  
+    value.int_value = 15;
+    init_param(&param, "id", "<=", INT, value);
+    param_list_add(&params, &param);  
+
+    param_list_print(&params);
+    LOAD_PERSONS(&params);
     print_persons();
-     
+        
+    person_t* person = new_person();
+    init_person(person, "Самойлова", "Дарья", "Сергеевна", "1982-09-02");
+    INSERT_PERSONS(person, 1)
+    
+    init_person(person, "Цветкова", "Елена", "Васильевна", "1982-07-11");
+    INSERT_PERSONS(person, 1)
+
+    init_person(person, "Новицкий", "Илья", "Сергеевич", "1982-09-02");
+    INSERT_PERSONS(person, 1)
+
+    SAVE_PERSONS()
 
     disconnect(conn);
     del_connection(conn);
     release_conn_param(cp);
+    
     return 0;
 }

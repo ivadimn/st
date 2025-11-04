@@ -7,12 +7,7 @@
 #define FROM_START  1
 #define FROM_END    0
 
-typedef union elem
-{
-    uint8_t asc[sizeof(int)];
-    int utf;
-} elem;
-
+typedef union elem elem;
 
 typedef struct vstr_t vstr_t;  
 
@@ -44,7 +39,7 @@ void vstr_assign(vstr_t *str, const char* value);
 /*
 * копирование строки
 */
-int vstr_copy(vstr_t* dest, vstr_t* source);
+int vstr_copy(vstr_t* dest, vstr_t* source, size_t start, size_t count);
 
 /*
 * создаёт объектс vstr из массива символов 
@@ -69,13 +64,24 @@ void vstr_print_data(vstr_t* str, FILE* f);
 /*
 * получает набор байтов из строки
 */
-void vstr_get_data(vstr_t* str, char* buf, size_t buflen);
+void vstr_copy_data(vstr_t* str, char* buf, size_t buflen);
+
+/*
+* возвращает указатель на набор байтов из строки
+*/
+char* vstr_get_data(vstr_t* str);
+
 
 /* сложить строки
 * переменное число аргументов char*
 * возвращает строку созданную путём сложения входных аргументов 
 */
 vstr_t* vstr_plus(long count, ...);
+
+/*добавляет к переданной строке 
+* переменное число аргументов char*
+*/
+int vstr_plusv(vstr_t* str, long count, ...);
 
 /*
 * возвращает размер буфера для строки
@@ -122,7 +128,7 @@ vstr_t* vstr_substr(vstr_t *str, long start, long end);
 * подстроки могут быть сгруппированы символами группировки тогда
 * группа включается в массив как подстрока
 */
-void vstr_split(/*vstr_array_t* arr,*/ vstr_t* str, char* delim, vstr_t* g_open, vstr_t* g_close);
+void vstr_split(vstr_array_t* arr, vstr_t* str, char* delim, vstr_t* g_open, vstr_t* g_close);
 
 /*
 * добавление символа в строку

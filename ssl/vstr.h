@@ -40,6 +40,11 @@ size_t vstr_size(vstr_t* str);
 size_t vstr_len(vstr_t* str);
 
 /*
+* возвращает текущую длину строки в байтах
+*/
+size_t vstr_len_bytes(vstr_t* str);
+
+/*
 * напечатать строку
 */
 void vstr_print(vstr_t* str, FILE* f);
@@ -48,6 +53,11 @@ void vstr_print(vstr_t* str, FILE* f);
 * печатает 16 представление символов в строке
 */
 void vstr_print_data(vstr_t* str, FILE* f);
+
+/* сложить строки
+* переменное число аргументов char*
+*/
+vstr_t* vstr_plus(long count, ...);
 
 /*
 * присваивает созданной уже строке новое значенине
@@ -119,6 +129,11 @@ void vstr_replace(vstr_t* str, char* what, char c);
 * преобразовывает символы строки в нижней регистр 
 */
 void vstr_tolower(vstr_t* str);
+
+/*
+* преобразовывает символы строки в верхний регистр 
+*/
+void vstr_toupper(vstr_t* str);
 
 /*
 * функции для работы с массивом строк

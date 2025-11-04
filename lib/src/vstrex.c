@@ -4,10 +4,11 @@
 #include <string.h>
 #include <stdint.h>
 #include <ctype.h>
-
+#include "utils.h"
 
 #define MAX_PART 8192
 typedef enum state { ONE, TWO } state_t;
+
 const uint8_t PERCENT = '%';
 
 typedef union elem
@@ -17,14 +18,15 @@ typedef union elem
 } elem;
 
 
-typedef struct {
+typedef struct vstr_t{
     elem *data;
     size_t size;                // максимальный длина в символах
     size_t length;              // текущая длина в символах
     size_t bytes;               // текущая длина в байтах
+    char* raw_bytes;
 } vstr_t;  
 
-typedef struct {
+typedef struct vstr_array_t {
     vstr_t** array;
     size_t size;
     size_t length;
@@ -32,9 +34,16 @@ typedef struct {
 
 const uint8_t hex_val[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF};
 
+/*
+* необходимое предварительное объявление функций
+*/
 vstr_t* vstr_create(size_t size);
 void vstr_free(vstr_t* str);
+size_t vstr_array_adds(vstr_array_t* arr, const char* str);
+vstr_t* vstr_append(vstr_t* str, const char* s);
 
+
+static void __resize(vstr_t *str, size_t new_size);
 
 static long __inhex(uint8_t ch) {
 	const char* hexch = "0123456789ABCDEF";
@@ -121,8 +130,7 @@ static int __strtodata(vstr_t* dest, uint8_t* source, size_t len)
     elem* data = dest->data;
     size_t lens = __str_len(source);
     if (dest->length + lens > dest->size)
-        return -1;
-    
+        __resize(dest, dest->length + lens);
     while (i < len)
     {
         if (source[i] < 128)
@@ -198,7 +206,7 @@ static void __recountbytes(vstr_t* str)
 static void __resize(vstr_t *str, size_t new_size)
 {
     elem* new_data = (new_size == 0) ? 
-        (elem*)malloc(sizeof(elem) * (str->size * 2)) : (elem*)malloc(sizeof(elem) * new_size);
+        (elem*)alloc(sizeof(elem) * (str->size * 2)) : (elem*)malloc(sizeof(elem) * new_size);
 
     memcpy(new_data, str->data, sizeof(elem) * str->length);
     free(str->data);
@@ -210,15 +218,12 @@ static void __resize(vstr_t *str, size_t new_size)
 * создаёт строку размером size
 */
 vstr_t* vstr_create(size_t size) {
-    vstr_t* str = (vstr_t*) malloc(sizeof(vstr_t));
-    if (str == NULL)
-        return NULL;
-    str->data = (elem*)malloc(sizeof(elem) * (size));
-    if (str->data == NULL) {
-        free(str);
-        return NULL;
-    }
+    vstr_t* str = (vstr_t*) alloc(sizeof(vstr_t));
+    
+    str->data = (elem*)alloc(sizeof(elem) * (size));
+    
     memset(str->data, 0, sizeof(elem) * (size));
+    str->raw_bytes = NULL;
     str->size = size;
     str->length = 0;
     str->bytes = 0;
@@ -229,6 +234,8 @@ vstr_t* vstr_create(size_t size) {
 * уничтожает строку и освоброждает память
 */
 void vstr_free(vstr_t* str) {
+    if (str->raw_bytes)
+        free(str->raw_bytes);
     free(str->data);
     free(str);
 }
@@ -257,7 +264,7 @@ void vstr_print_param(vstr_t* str)
 */
 void vstr_print(vstr_t* str, FILE* f) 
 {
-    uint8_t* tmp = (uint8_t*) malloc(sizeof(uint8_t) * (str->bytes + 1));
+    uint8_t* tmp = (uint8_t*) alloc(sizeof(uint8_t) * (str->bytes + 1));
     __datatostr(tmp, str);
     fwrite(tmp, sizeof(uint8_t), strlen((const char*) tmp), f);
     fwrite("\n", 1, 1, f);
@@ -276,15 +283,30 @@ void vstr_print_data(vstr_t* str, FILE* f)
     fprintf(f, "\n");
 }
 
-/*ff
+/*
 * получает набор байтов из строки
 */
-void vstr_get_data(vstr_t* str, char* buf, size_t buflen)
+void vstr_copy_data(vstr_t* str, char* buf, size_t buflen)
 {
     if(buflen < str->bytes - 1)
         return;
     __datatostr((uint8_t*) buf, str);    
 }
+
+/*
+* возвращает указатель на набор байтов из строки
+*/
+char* vstr_get_data(vstr_t* str)
+{
+    if (str->raw_bytes)
+        free(str->raw_bytes);
+    
+    str->raw_bytes = (char*) alloc(sizeof(char) * (str->bytes + 1));
+    __datatostr((uint8_t*)str->raw_bytes, str);
+
+    return str->raw_bytes;
+}
+
 
 /*
 * присваивает созданной уже строке новое значенине
@@ -341,10 +363,8 @@ vstr_t* vstr_plus(long count, ...) {
         len += len_vals[i];
     }
     va_end(ap); 
-    tmp = (uint8_t*) malloc(sizeof(uint8_t) * (len + 1));
-    if (tmp == NULL)
-        return NULL;
-        
+    tmp = (uint8_t*) alloc(sizeof(uint8_t) * (len + 1));
+            
     va_start(ap, count);  
     len = 0; 
     for(long i = 0; i < count; i++)  {
@@ -352,8 +372,42 @@ vstr_t* vstr_plus(long count, ...) {
         len +=  len_vals[i];
     }
     va_end(ap); 
+    tmp[len] = 0;
     str = vstr_dup((const char*) tmp);
+    free(tmp);
     return str;
+}
+
+/*добавляет к переданной строке 
+* переменное число аргументов char*
+* 
+*/
+int vstr_plusv(vstr_t* left, long count, ...) {
+    
+    long len = 0;
+    long len_vals[count];
+    va_list ap; 
+    vstr_t* str = NULL;  
+    uint8_t* tmp;      
+    //вычисляем суммарную длину создаваемой строки
+    va_start(ap, count);    
+    for(long i = 0; i < count; i++)  {
+        len_vals[i] = strlen(va_arg(ap, char*));
+        len += len_vals[i];
+    }
+    va_end(ap); 
+    tmp = (uint8_t*) alloc(sizeof(uint8_t) * len);
+            
+    va_start(ap, count);  
+    len = 0; 
+    for(long i = 0; i < count; i++)  {
+        memcpy(tmp + len, va_arg(ap, char*), len_vals[i]);
+        len +=  len_vals[i];
+    }
+    va_end(ap); 
+    __strtodata(left, tmp, len);
+    free(tmp);
+    return 0;
 }
 
 /*
@@ -466,7 +520,7 @@ vstr_t* vstr_substr(vstr_t *str, long start, long end) {
 * подстроки могут быть сгруппированы символами группировки тогда
 * группа включается в массив как подстрока
 */
-void vstr_split(/*vstr_array_t* arr,*/ vstr_t* str, char* delim, vstr_t* g_open, vstr_t* g_close) {
+void vstr_split(vstr_array_t* arr, vstr_t* str, char* delim, vstr_t* g_open, vstr_t* g_close) {
     long len = str->length, index = 0;
     elem* buf = str->data;
     uint8_t in_group = 0;
@@ -474,7 +528,7 @@ void vstr_split(/*vstr_array_t* arr,*/ vstr_t* str, char* delim, vstr_t* g_open,
     int is_delim = 0;
     vstr_t* dlms = vstr_dup(delim);
 
-    uint8_t *part = (uint8_t*) malloc(sizeof(uint8_t) * MAX_PART);
+    uint8_t *part = (uint8_t*) alloc(sizeof(uint8_t) * MAX_PART);
         
     for (long i = 0; i < len; i++) {
         
@@ -483,8 +537,8 @@ void vstr_split(/*vstr_array_t* arr,*/ vstr_t* str, char* delim, vstr_t* g_open,
                 if (vstr_in(dlms, buf[i].utf) >= 0) {
                     if (!is_delim) {
                         part[index] = '\0';
-                        //vstr_array_adds(arr, (char*)part);
-                        printf("%s\n", (char*) part);
+                        vstr_array_adds(arr, (char*)part);
+                        //printf("%s\n", (char*) part);
                         index = 0;
                         is_delim = 1;
                     }
@@ -499,21 +553,18 @@ void vstr_split(/*vstr_array_t* arr,*/ vstr_t* str, char* delim, vstr_t* g_open,
                 } 
                 else if (!is_delim)  {
                     index = __elemtostr(&buf[i], part, index);
-                    //part[index++] = buf[i].utf;
                 }
                 break;
             case 1:
                 if (buf[i].utf == vstr_at(g_close, g_index)) {
                     part[index] = 0;
-                    //vstr_array_adds(arr, (char*)part);
-                    printf("%s\n", (char*) part);
+                    vstr_array_adds(arr, (char*)part);
                     index = 0;
                     in_group = 0;
                     g_index = -1;
                 }
                 else {
                     index = __elemtostr(&buf[i], part, index);
-                    //part[index++] = buf[i].utf;
                 }
                 break;
             default:
@@ -523,8 +574,7 @@ void vstr_split(/*vstr_array_t* arr,*/ vstr_t* str, char* delim, vstr_t* g_open,
     }
     if (index > 0) {
         part[index] = 0;
-        //vstr_array_adds(arr, (char*)part);
-        printf("%s\n", (char*) part);    
+        vstr_array_adds(arr, (char*)part);
     }
     vstr_free(dlms);
     free(part);
@@ -555,7 +605,7 @@ void vstr_urldecode(vstr_t *str) {
 	long index, buf_index = 0;
     int decode = 0;
     size_t len = 0;
-    tmp = (uint8_t*)malloc(sizeof(uint8_t) * str->size);
+    tmp = (uint8_t*)alloc(sizeof(uint8_t) * str->size);
 
     __datatostr(tmp, str);
     len = strlen((const char*)tmp);
@@ -720,9 +770,8 @@ static int vstr_array_resize(vstr_array_t *arr) {
     // здесь нужно придумать принцип увеличения размера
     // можно использовать время жизни массива и количество увеличений за это время
     long newc = arr->size * 2;
-    vstr_t** array = (vstr_t**) malloc(sizeof(vstr_t*) * newc);
-    if(array == NULL)
-        return -1;
+    vstr_t** array = (vstr_t**) alloc(sizeof(vstr_t*) * newc);
+    
     for (size_t i = 0; i < arr->length; i++)  {
         array[i] = arr->array[i];
     }
@@ -735,15 +784,11 @@ static int vstr_array_resize(vstr_array_t *arr) {
 /*
 * создаёт массив длинной size
 */
-vstr_array_t* vstr_array_create(long size) {
-    vstr_array_t *arr = (vstr_array_t*) malloc(sizeof(vstr_array_t));
-    if (arr == NULL)
-        return NULL;
-    arr->array = (vstr_t**) malloc(sizeof(vstr_t*) * size);
-    if (arr->array == NULL) {
-        free(arr);
-        return NULL;
-    }
+vstr_array_t* vstr_array_create(size_t size) {
+    vstr_array_t *arr = (vstr_array_t*) alloc(sizeof(vstr_array_t));
+    
+    arr->array = (vstr_t**) alloc(sizeof(vstr_t*) * size);
+    
     arr->size = size;
     arr->length = 0;
     return arr;

@@ -1,5 +1,5 @@
 
-PROG=print
+PROG=test
 FILES=
 ASM=nasm
 LINK=ld

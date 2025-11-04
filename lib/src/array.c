@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "array.h"
+#include "utils.h"
 
 /*
 * проверяет наличие элемента в массиве arr по индексу index
@@ -16,9 +17,7 @@ static int _isvalid(array_t *arr, size_t index) {
 * все элемннты свободны
 */
 static void _valid(array_t *arr) {
-    arr->valids = (int*) malloc(arr->size * sizeof(int));
-    if(arr->valids == NULL)
-        crit("Ошибка распределения памяти для массива валидаторов\n");
+    arr->valids = (int*) alloc(arr->size * sizeof(int));
     for (size_t i = 0; i < arr->size; i++) {
         arr->valids[i] = -1;
     }
@@ -40,13 +39,22 @@ static void _revalid(array_t *arr, size_t index) {
 }
 
 /*
+* сдвигает индексы валидности на 1 влево
+*/
+static void _move_valid(array_t *arr, size_t index) {
+
+    for (size_t i = index + 1; i < arr->size; i++) {
+        arr->valids[i - 1] = arr->valids[i];
+    }
+}
+
+/*
 * распределить память под массив
 */
 static void _alloc(array_t* arr) {
     _valid(arr);
-    arr->arr = (uint8_t*) calloc(arr->size * arr->size_pointer,  sizeof(uint8_t));
-    if(arr->arr == NULL)
-        crit("Ошибка распределения памяти для элементов массива\n");
+    arr->arr = (uint8_t*) alloc(sizeof(uint8_t) * (arr->size * arr->size_pointer));
+    memset(arr->arr, 0, (arr->size * arr->size_pointer));
 }
 
 
@@ -66,20 +74,15 @@ static void _realloc(array_t* arr, size_t index) {
 * расширить размерность массива
 */
 static void _renew(array_t* arr, size_t index) {
-
     _realloc(arr, index); 
-    if (arr->arr == NULL) 
-        crit("Ошибка распределения памяти при изменение размера массива");
 }
 
 /*
 * создать массив элементов типа t размера size
 */
 array_t* new_array(atype_t type, size_t size, size_t size_pointer) {
-    array_t *arr = malloc(sizeof(array_t));
-    if (arr == NULL) 
-        crit("Ошибка распределения памяти под массив");
-
+    array_t *arr = alloc(sizeof(array_t));
+    
     arr->valids = NULL;
     arr->size = size;
     arr->type = type;
@@ -140,5 +143,18 @@ void get(array_t* arr, size_t index,  void* e) {
     cp += index * arr->size_pointer;
     if (_isvalid(arr, index)) {
         memcpy(e, cp, arr->size_pointer);
+    }
+}
+
+void pop(array_t* arr, size_t index, void* e)
+{
+    uint8_t* cp = arr->arr;
+    cp += index * arr->size_pointer;
+    if (_isvalid(arr, index)) {
+        memcpy(e, cp, arr->size_pointer);
+        size_t stay_count = arr->size - (index + 1);
+        uint8_t*  rp = cp + arr->size_pointer;
+        memcpy(cp, rp, arr->size_pointer * stay_count);
+        _move_valid(arr, index);
     }
 }

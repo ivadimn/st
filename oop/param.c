@@ -1,59 +1,81 @@
-#include <stdlib.h>
+
+#include <stdio.h>
 #include <string.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include "param.h"
+#include "../lib/src/utils.h"
 
-
-static int __set_value(param_t* param, type_t type, value_t value)
+param_list_t* new_param_lists(size_t count)
 {
+    param_list_t *pl = (param_list_t*) alloc(sizeof(param_list_t) * count);
+    for (size_t i = 0; i < count; i++)
+    {
+        pl[i].size = 0;
+    }
+    return pl;
+}
+
+void del_param_list(param_list_t* pl)
+{
+    free(pl);
+}
+
+void print_param(param_t* p)
+{
+    printf("%s %s %s, тип: %d", p->name, p->op, p->text_value, p->type);
+    if (p->type == TEXT)
+        printf(", %s\n", p->value.text_value);
+    else 
+        printf("\n");    
+}
+
+void init_param(param_t *p, char* name, char* op, type_t type, value_t value)
+{
+    strncpy(p->name, name, NAME_LEN);
+    strncpy(p->op, op, OP_LEN);
+    p->value = value;
+    p->type = type;
     switch (type)
     {
-    case TEXT:
-        param->value.text_value = (char*)malloc(sizeof(char) * strlen(value.text_value) + 1);
-        if (param->value.text_value == NULL)
-            return -1;        
-        strncpy(param->value.text_value, value.text_value, strlen(value.text_value));
-        break;
-    case BLOB:
-        param->value.blob = (uint8_t*)malloc(sizeof(uint8_t) * sizeof(value.blob));
-        if (param->value.blob == NULL)
-            return -1;
-        memcpy(param->value.blob, value.blob, sizeof(value.blob)); 
-        break;
-    case SERIAL:
-        param->value.pkey_value = value.pkey_value;
-        break;
-    case INT:
-        param->value.int_value = value.int_value;
-        break;
-    case LONG:
-        param->value.long_value = value.long_value;
-        break;
-    case FLOAT:
-        param->value.float_value = value.float_value;
-        break;
-    case DOUBLE:
-        param->value.double_value = value.double_value;
-        break;  
-    case CHAR:
-        param->value.char_value = value.char_value;
-        break;                  
+        case INT:
+            snprintf(p->text_value, PARAM_LEN, "%d", p->value.int_value);
+            break;
+        case LONG:
+            snprintf(p->text_value, PARAM_LEN, "%ld", p->value.long_value);
+            break;
+        case FLOAT:
+            snprintf(p->text_value, PARAM_LEN, "%f", p->value.float_value);
+            break;
+        case DOUBLE:
+            snprintf(p->text_value, PARAM_LEN, "%f", p->value.double_value);
+            break; 
+        case TEXT:
+            snprintf(p->text_value, PARAM_LEN, "%s", "Pointer");
+            break;     
     default:
-        return -1;
+        break;
     }
-    return 0;
 }
 
 
-int param_list_add(param_list_t* listp, type_t type, value_t value)
+int param_list_add(param_list_t* listp, param_t* param)
 {
          
     if (listp->size == MAX_PARAMS)
-        return -1;
+        return 1;
 
-    if (__set_value(&(listp->params[listp->size]), type, value))
-        return -1;
-    
+    memcpy(&(listp->params[listp->size]), param, sizeof(param_t));    
     listp->size++;
+
     return 0;
+}
+
+void param_list_print(param_list_t* listp)
+{
+    for (size_t i = 0; i < listp->size; i++)
+    {
+        print_param(&(listp->params[i]));
+    }
+    
 }

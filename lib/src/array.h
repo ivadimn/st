@@ -3,21 +3,16 @@
 #include <stddef.h>
 #include <stdint.h>
 #include "log.h"
-
-#define DEFAULT_SIZE 32
+#include "utils.h"
 
 
 #define REALLOC(ptr, osize, nsize, t)                 \
     do                                                \
     {                                                 \
-        t *tmp = (t*)malloc(sizeof(t) * (osize));     \
+        t *tmp = (t*)alloc(sizeof(t) * (osize));      \
         memcpy(tmp, ptr, (osize) * sizeof(t));        \
-        if(tmp == NULL)                               \
-            crit("Ошибка распределения памяти\n");    \
-        free(ptr);                                    \
-        ptr = (t*) malloc(sizeof(t) * (nsize));       \
-        if(ptr == NULL)                               \
-            crit("Ошибка распределения памяти\n");    \
+        free(ptr);                                     \
+        ptr = (t*) alloc(sizeof(t) * (nsize));        \
         memcpy(ptr, tmp,  (osize) * sizeof(t));       \
         free(tmp);                                    \
     } while(0)                          
@@ -62,5 +57,10 @@ void putm(array_t* arr, size_t index, void* p, size_t count);
 * получить элемент массива по индексу
 */
 void get(array_t* arr, size_t index, void* e);
+
+/*
+* удалить элемент из массива по индексу
+*/
+void pop(array_t* arr, size_t index, void* e);
 
 #endif
