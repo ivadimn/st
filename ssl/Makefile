@@ -1,6 +1,6 @@
 
 PROG=test
-FILES=dict.c
+FILES=dict.c utils.c
 CC=gcc
 
 CFLAGS=-Wall -Wextra -Wpedantic -Wno-unused-parameter
