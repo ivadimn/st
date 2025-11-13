@@ -63,4 +63,27 @@ void _collection_move(collection_t* c, size_t index, size_t count)
     memset(dst, 0, (c->size_value) * count);    
 }
 
+int _collection_has_item(collection_t* c, void* e)
+{
+    return _collection_index_of(c, e) >= 0 ? 1 : 0;
+}
+
+long _collection_index_of(collection_t* c, void* e)
+{
+    long result = -1;
+    uint8_t* pi = c->items, *pe;
+    size_t step = c->size_value;
+    pe = (uint8_t*) alloc(sizeof(uint8_t) * step);
+    for (size_t i = 0; i < c->size; i++)
+    {
+        memcpy(pe, pi, step);
+        if (memcmp(pe, e, step) == 0) {
+            result = i;
+            break;
+        }
+        pi += step;
+    }
+    free(pe);
+    return result;
+}
 

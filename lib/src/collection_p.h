@@ -20,6 +20,8 @@ void _collection_dispose(collection_t* c);
 void _collection_add(collection_t* c, size_t index, void* e);
 int _collection_get(collection_t* c, size_t index, void* e);
 void _collection_move(collection_t* c, size_t index, size_t count);
+int _collection_has_item(collection_t* c, void* e);
+long _collection_index_of(collection_t* c, void* e);
 
 
 
