@@ -45,23 +45,42 @@ typedef struct data_t {
 int main(int argc, char** argv)
 {
     size_t bcount = 15;
-    data_t d;
+    data_t d[20];
+    data_t e;
     list_t* l = list_new(10, sizeof(data_t));
 
     for (size_t i = 0; i < 20; i++)
     {
-        strcpy(d.name, keys[i]);
-        d.x = i * 2;
-        d.y = i * 3;
-        list_add(l, &d);
+        strcpy(d[i].name, keys[i]);
+        d[i].x = i * 2;
+        d[i].y = i * 3;
+        list_add(l, &d[i]);
+    }
+       
+    for (size_t i = 0; i < list_length(l); i++)
+    {
+        list_get(l, i, &e);
+        printf("Name: %s, x: %ld, y: %ld\n", e.name, e.x, e.y);
     }
 
-       
-    for (size_t i = 0; i < 20; i++)
+    printf("-----------------------------------------\n");
+    list_remove_by_index(l, 19);
+
+    for (size_t i = 0; i < list_length(l); i++)
     {
-        list_get(l, i, &d);
-        printf("Name: %s, x: %ld, y: %ld\n", d.name, d.x, d.y);
+        list_get(l, i, &e);
+        printf("Name: %s, x: %ld, y: %ld\n", e.name, e.x, e.y);
     }
+
+     printf("-----------------------------------------\n");
+    list_remove(l, &d[10]);
+
+    for (size_t i = 0; i < list_length(l); i++)
+    {
+        list_get(l, i, &e);
+        printf("Name: %s, x: %ld, y: %ld\n", e.name, e.x, e.y);
+    }
+
 
     list_del(l);
     return 0;
