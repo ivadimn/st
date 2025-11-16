@@ -1,5 +1,5 @@
 
-PROG=test
+PROG=main
 FILES=
 CC=gcc
 
