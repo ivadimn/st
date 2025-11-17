@@ -1,5 +1,5 @@
 
-PROG=main
+PROG=time_server
 FILES=
 CC=gcc
 

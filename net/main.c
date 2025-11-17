@@ -1,9 +1,43 @@
-
-#include <stdio.h>
-#include <stdlib.h>
 #include <ifaddrs.h>
-#include <time.h>
 #include "vnet.h"
+#include "../lib/src/log.h"
+
+
+int time_client(char* host)
+{
+    int sockfd, n;
+    char recvline[MAXLINE + 1];
+    struct sockaddr_in servaddr;
+
+    sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    if (!ISVALIDSOCKET(sockfd))
+    {
+        crit("Ошибка создания сокета: ");
+        return 1;
+    }
+    bzero(&servaddr, sizeof(servaddr));
+    servaddr.sin_family = AF_INET;
+    servaddr.sin_port = htons(13);
+    if (inet_pton(AF_INET, host, &servaddr.sin_addr) <= 0)
+    {
+        crit("Ошибка трансляции адреса %s", host);
+    }
+
+    if (connect(sockfd,(SA *) &servaddr, sizeof(servaddr)) < 0)
+    {
+        crit("Ошибка соединения: ");
+    }
+    while ((n = read(sockfd, recvline, MAXLINE)) > 0)
+    {
+        recvline[n] = 0;
+        fputs(recvline, stdout);
+    }
+    if (n < 0)
+    {
+        err("Ошибка чтения сокета: ");
+    }
+    return 0;
+}
 
 int adapters_list()
 {
@@ -92,6 +126,11 @@ void ltime()
 int main(int argc, char** argv)
 {
     //adapters_list();
-    ltime();
+    //ltime();
+    if (argc != 2)
+    {
+        err("Использование ./main ipaddress\n");
+    }
+    time_client(argv[1]);
     return 0;
 }
