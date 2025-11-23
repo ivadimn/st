@@ -9,12 +9,8 @@ int time_client(char* host)
     char recvline[MAXLINE + 1];
     struct sockaddr_in servaddr;
 
-    sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    if (!ISVALIDSOCKET(sockfd))
-    {
-        crit("Ошибка создания сокета: ");
-        return 1;
-    }
+    sockfd = vsocket(AF_INET, SOCK_STREAM, 0);
+    
     bzero(&servaddr, sizeof(servaddr));
     servaddr.sin_family = AF_INET;
     servaddr.sin_port = htons(13);
@@ -129,7 +125,12 @@ int main(int argc, char** argv)
     //ltime();
     if (argc != 2)
     {
-        err("Использование ./main ipaddress\n");
+        info("info Использование ./main ipaddress");
+        //debug("debug Использование ./main ipaddress");
+        //warning("warning Использование ./main ipaddress");
+        //err("err Использование ./main ipaddress");
+        crit("crit Использование ./main ipaddress");
+        return 1;
     }
     time_client(argv[1]);
     return 0;

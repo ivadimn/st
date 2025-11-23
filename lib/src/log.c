@@ -101,7 +101,7 @@ void console(int level, const char *buf) {
             fprintf(stderr, "%s%s%s\n", ERROR, buf, RESET);
             break; 
         case LOG_CRIT:   
-            fprintf(stderr, "%s%s%s\n", ERROR, buf, RESET);
+            fprintf(stderr, "%s%s%s\n", CRIT, buf, RESET);
             break; 
         default: 
             fprintf(stderr, "%s%s%s\n", INFO, buf, RESET);
@@ -119,9 +119,8 @@ void logv(const char* func_name, int level, const char* fmt, ...) {
     if (level == LOG_CRIT) {
         log_write(func_name, 1, errno, level, fmt, ap);
         va_end(ap);
-        abort(); 
         pthread_mutex_unlock(&mtx);
-        exit(1);    
+        exit(errno);    
     }
     else if (level == LOG_ERR) {
         log_write(func_name, 1, errno, level, fmt, ap);
@@ -168,5 +167,6 @@ void log_write(const char* func_name, int errnoflag, int error, int level,
         if (level == LOG_CRIT) {
             wrote = write(log_fd, st_info, strlen(st_info));
         }
+        //write(log_fd, "printed message\n", strlen("printed message\n"));
     }
 }

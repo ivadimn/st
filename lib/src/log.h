@@ -20,6 +20,7 @@
 #define DEBUG    "\033[1;33m"
 #define INFO     "\033[1;37m"
 #define ERROR    "\033[1;31m"
+#define SYS      "\033[1;32m"
 #define WARNING  "\033[1;36m"
 #define CRIT     "\033[1;35m"
 
@@ -29,6 +30,7 @@
 #define info(fmt, ...) logv(__func__, LOG_INFO, fmt __VA_OPT__(,) __VA_ARGS__)
 #define debug(fmt, ...) logv(__func__, LOG_DEBUG, fmt __VA_OPT__(,) __VA_ARGS__)
 #define err(fmt, ...) logv(__func__, LOG_ERR, fmt __VA_OPT__(,) __VA_ARGS__)
+#define sys(fmt, ...) logv(__func__, LOG_SYS, fmt __VA_OPT__(,) __VA_ARGS__)
 #define warning(fmt, ...) logv(__func__, LOG_WARNING, fmt __VA_OPT__(,) __VA_ARGS__)
 #define crit(fmt, ...) logv(__func__, LOG_CRIT, fmt __VA_OPT__(,) __VA_ARGS__)
 

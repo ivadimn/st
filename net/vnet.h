@@ -28,4 +28,11 @@
 
 #define SA                  struct sockaddr 
 
+
+/*
+* функции обёртки
+*/
+
+int vsocket(int family, int type, int protocol);
+
 #endif
