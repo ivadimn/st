@@ -18,6 +18,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <pthread.h>
 
 #define ISVALIDSOCKET(s)    ((s) >= 0)
 #define CLOSESOCKET(s)      close(s)
@@ -27,6 +28,7 @@
 #define BUFFSIZE            8192
 
 #define SA                  struct sockaddr 
+typedef int                 socket_t;
 
 
 /*
@@ -34,5 +36,7 @@
 */
 
 int vsocket(int family, int type, int protocol);
+void vthread_mutex_lock(pthread_mutex_t *mptr);
+void vbind(socket_t s, struct addrinfo addr, socklen_t len);
 
 #endif
