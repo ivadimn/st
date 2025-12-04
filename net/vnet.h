@@ -27,6 +27,7 @@
 #define MAXLINE             4096
 #define BUFFSIZE            8192
 
+#define BACKLOG             32
 #define SA                  struct sockaddr 
 typedef int                 socket_t;
 
@@ -37,6 +38,12 @@ typedef int                 socket_t;
 
 int vsocket(int family, int type, int protocol);
 void vthread_mutex_lock(pthread_mutex_t *mptr);
-void vbind(socket_t s, struct addrinfo addr, socklen_t len);
+void vgetaddrinfo(const char *node, const char *service,
+                const struct addrinfo *hints,
+                struct addrinfo **res);
+
+void vbind(socket_t s, struct sockaddr *addr, socklen_t len);
+void vlisten(socket_t s, int backlog);
+socket_t vaccept(socket_t s, struct sockaddr *addr, socklen_t len);
 
 #endif

@@ -22,12 +22,45 @@ void vthread_mutex_lock(pthread_mutex_t *mptr)
     err("Ошибка блокировки мьютекса");
 }
 
-void vbind(socket_t s, struct sockaddr* addr, socklen_t len)
+void vgetaddrinfo(const char *node, const char *service,
+                const struct addrinfo *hints,
+                struct addrinfo **res)
 {
-    int n;
-    if ((n = bind(s, addr, len)) == 0)
-        return
-    errno = n;
-    err("Ошибка привязки адреса");
+    int result = getaddrinfo(node, service, hints, res);
+    if (result != 0)
+    {
+        err(gai_strerror(result));
+        exit(result);
+    }
+    return;
 }
 
+void vbind(socket_t s, struct sockaddr* addr, socklen_t len)
+{
+    int result = bind(s, addr, len);
+    if ( result == 0)
+        return;
+    err("Ошибка привязки сокета");
+    return;
+}
+
+void vlisten(socket_t s, int backlog)
+{
+    int result = listen(s, backlog);
+    if (result == 0)
+        return;
+    err("Ошибка функции listen");
+    exit(result);    
+}
+
+socket_t vaccept(socket_t s, struct sockaddr *addr, socklen_t len)
+{
+    socket_t client_socket;
+    client_socket = accept(s, addr, &len);
+    if (!ISVALIDSOCKET(client_socket))
+    {
+        err("Ошибка внешнего соединения");
+        return - 1;
+    }
+    return client_socket;
+}

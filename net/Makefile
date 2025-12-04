@@ -1,6 +1,6 @@
 
-PROG=main
-FILES=
+PROG=time_server
+FILES=vnet.c
 CC=gcc
 
 CFLAGS=-Wall -Wextra -Wpedantic -Wno-unused-parameter
