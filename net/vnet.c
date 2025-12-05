@@ -64,3 +64,39 @@ socket_t vaccept(socket_t s, struct sockaddr *addr, socklen_t len)
     }
     return client_socket;
 }
+
+/*
+* инициализирует сервер с любым доступным локальным адресом
+*/
+socket_t init_server_default(const char* service)
+{
+    AI hints, *bind_address;
+    
+    //конфигурируем локальные для привязки к порту
+    bzero(&hints, sizeof(hints));
+
+    hints.ai_family = AF_INET;          //IPv4
+    hints.ai_socktype = SOCK_STREAM;    //TCP protocol
+    hints.ai_flags = AI_PASSIVE;        //любой доступный сетевой интерфейс
+
+    /*
+    * используем getaddrinfo для заполнения структуры addrinfo (bind_address)
+    */
+    vgetaddrinfo(0, service, &hints, &bind_address);
+
+    /*
+    * создаём сокет с параметрами полученными в bind_address 
+    */
+    socket_t serv_socket;
+    serv_socket = vsocket(bind_address->ai_family, bind_address->ai_socktype, bind_address->ai_protocol);
+
+    //привязываем сокет к локальному адресу
+    vbind(serv_socket, bind_address->ai_addr, bind_address->ai_addrlen);
+
+    /*
+    * начинаем слушать входящие соединения
+    */
+    vlisten(serv_socket, BACKLOG);
+
+    return serv_socket;
+}

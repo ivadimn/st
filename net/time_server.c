@@ -3,33 +3,7 @@
 
 int main(int argc, char** argv)
 {
-    //стандартные процедуры конфигурирования серверного сокета
-    printf("Confuguring local address...\n");
-    struct addrinfo hints, *bind_address;
-    
-    //конфигурируем локальные для привязки к порту
-    bzero(&hints, sizeof(hints));
-    hints.ai_family = AF_INET;          //IPv4
-    hints.ai_socktype = SOCK_STREAM;    //TCP protocol
-    hints.ai_flags = AI_PASSIVE;        //любой доступный сетевой интерфейс
-
-    /*
-    * используем getaddrinfo для заполнения структуры addrinfo (bind_address)
-    */
-    vgetaddrinfo(0, "8080", &hints, &bind_address);
-
-    printf("Creating socket...\n");
-    socket_t serv_socket;
-    serv_socket = vsocket(bind_address->ai_family, bind_address->ai_socktype, bind_address->ai_protocol);
-
-    printf("Binding socket to local address...\n");
-    vbind(serv_socket, bind_address->ai_addr, bind_address->ai_addrlen);
-    
-    freeaddrinfo(bind_address);
-
-    printf("Listening...\n");
-    vlisten(serv_socket, BACKLOG);
-
+    socket_t serv_socket = init_server_default("8080");
     printf("Waiting for connection...\n");
     // дальше надо всё обернуть в цикл
     struct sockaddr_storage client_address;     //для сохранения адреса соединённого клиента

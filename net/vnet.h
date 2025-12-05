@@ -28,8 +28,10 @@
 #define BUFFSIZE            8192
 
 #define BACKLOG             32
-#define SA                  struct sockaddr 
+//#define SA                  struct sockaddr 
+typedef struct sockaddr     SA;
 typedef int                 socket_t;
+typedef struct addrinfo     AI;
 
 
 /*
@@ -45,5 +47,7 @@ void vgetaddrinfo(const char *node, const char *service,
 void vbind(socket_t s, struct sockaddr *addr, socklen_t len);
 void vlisten(socket_t s, int backlog);
 socket_t vaccept(socket_t s, struct sockaddr *addr, socklen_t len);
+
+socket_t init_server_default(const char* service);
 
 #endif
