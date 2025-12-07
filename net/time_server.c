@@ -3,7 +3,7 @@
 
 int main(int argc, char** argv)
 {
-    socket_t serv_socket = init_server_default("8080");
+    socket_t serv_socket = init_server_inet6("8080");
     printf("Waiting for connection...\n");
     // дальше надо всё обернуть в цикл
     struct sockaddr_storage client_address;     //для сохранения адреса соединённого клиента

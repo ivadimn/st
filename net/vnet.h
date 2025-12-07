@@ -49,5 +49,6 @@ void vlisten(socket_t s, int backlog);
 socket_t vaccept(socket_t s, struct sockaddr *addr, socklen_t len);
 
 socket_t init_server_default(const char* service);
+socket_t init_server_inet6(const char* service);
 
 #endif
